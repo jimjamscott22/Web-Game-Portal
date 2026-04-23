@@ -110,7 +110,7 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
       }
       return newSnake;
     });
-  }, gameState === 'playing');
+  }, gameState === 'playing', 1000 / SPEEDS[speed]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
