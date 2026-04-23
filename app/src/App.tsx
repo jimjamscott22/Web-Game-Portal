@@ -10,6 +10,7 @@ const GameMinesweeper = lazy(() => import('@/pages/GameMinesweeper'));
 const GameSnake = lazy(() => import('@/pages/GameSnake'));
 const GameTetris = lazy(() => import('@/pages/GameTetris'));
 const GameSudoku = lazy(() => import('@/pages/GameSudoku'));
+const GameBinairo = lazy(() => import('@/pages/GameBinairo'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/snake" element={<GameSnake />} />
           <Route path="/tetris" element={<GameTetris />} />
           <Route path="/sudoku" element={<GameSudoku />} />
+          <Route path="/binairo" element={<GameBinairo />} />
         </Routes>
       </Suspense>
     </div>

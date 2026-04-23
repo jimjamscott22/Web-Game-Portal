@@ -78,6 +78,17 @@ export const GAMES: GameConfig[] = [
     difficulties: ['Easy', 'Medium', 'Hard'],
     defaultDifficulty: 'Easy',
   },
+  {
+    id: 'binairo',
+    title: 'Binairo',
+    description: 'Place 0s and 1s on the grid — no three alike in a row, equal counts per line, every row and column unique.',
+    color: '#7C4DFF',
+    bgColor: '#7C4DFF',
+    route: '/binairo',
+    previewImage: '/assets/card-preview-binairo.svg',
+    difficulties: ['Easy', 'Medium', 'Hard'],
+    defaultDifficulty: 'Easy',
+  },
 ];
 
 export const NAV_GAMES: NavGame[] = GAMES.map(g => ({
