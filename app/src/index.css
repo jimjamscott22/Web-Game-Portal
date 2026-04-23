@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 96%;
+    --foreground: 0 0% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
+    --primary: 180 18% 37%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 43 97% 63%;
+    --secondary-foreground: 0 0% 8%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 336 90% 69%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 8%;
+    --input: 0 0% 90%;
+    --ring: 336 90% 69%;
+    --radius: 0.625rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #F5F5F5;
+    color: #151515;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Pixelify Sans', monospace;
+  }
+}
+
+@layer components {
+  .font-pixel {
+    font-family: 'Pixelify Sans', monospace;
+  }
+
+  .font-body {
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-bounce {
+    transition: all 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .btn-bounce:active {
+    transform: translateY(4px);
+  }
+
+  .card-bounce {
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .snap-ease {
+    transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  }
+}
+
+@layer utilities {
+  .text-shadow-pixel {
+    text-shadow: 4px 4px 0 rgba(0,0,0,0.08);
+  }
+
+  .text-shadow-pixel-sm {
+    text-shadow: 3px 3px 0 rgba(247,108,165,0.3);
+  }
+}
