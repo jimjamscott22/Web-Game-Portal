@@ -160,6 +160,15 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
       ctx.lineWidth = 2;
       ctx.strokeRect(x + 1, y + 1, CELL - 2, CELL - 2);
 
+      if (!isHead) {
+        const bit = ((seg.x * 31 + seg.y * 17 + i * 7) & 1).toString();
+        ctx.fillStyle = '#151515';
+        ctx.font = `bold ${Math.floor(CELL * 0.6)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(bit, x + CELL / 2, y + CELL / 2 + 1);
+      }
+
       if (isHead) {
         ctx.fillStyle = '#151515';
         const eyeSize = 3;
