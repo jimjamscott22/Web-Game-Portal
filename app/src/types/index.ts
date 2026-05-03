@@ -48,7 +48,7 @@ export const GAMES: GameConfig[] = [
   {
     id: 'snake',
     title: 'Snake',
-    description: "Guide the hungry snake to eat food and grow longer. Don't crash into the walls or yourself!",
+    description: "Guide the hungry snake to eat binary bits and grow longer. The bits you eat form your score! Don't crash into the walls or yourself!",
     color: '#8CC298',
     bgColor: '#8CC298',
     route: '/snake',

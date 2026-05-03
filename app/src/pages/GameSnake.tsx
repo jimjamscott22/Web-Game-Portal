@@ -30,7 +30,7 @@ export default function GameSnake() {
 
         <div className="max-w-[500px] mx-auto mt-6">
           <HowToPlayPanel
-            instructions="Use arrow keys or WASD to guide the snake. Eat the red food to grow and earn points. Don't hit the walls or yourself! Use the on-screen controls on mobile."
+            instructions="Use arrow keys or WASD to guide the snake. Eat the 1 and 0 foods to grow. The bits you eat form a binary number that becomes your score! Don't hit the walls or yourself!."
           />
         </div>
       </div>

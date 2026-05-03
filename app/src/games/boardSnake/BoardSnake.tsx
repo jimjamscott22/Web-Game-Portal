@@ -1,13 +1,14 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   createSnake,
-  randomFood,
+  spawnFoods,
   moveSnake,
   getOpposite,
   GRID_SIZE,
   SPEEDS,
   type Direction,
   type Position,
+  type Food,
 } from './gameLogic';
 import { useKeyboard } from '@/hooks/useKeyboard';
 import { useSwipe } from '@/hooks/useSwipe';
@@ -23,7 +24,7 @@ interface BoardSnakeProps {
 export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [snake, setSnake] = useState<Position[]>(createSnake);
-  const [food, setFood] = useState<Position>(() => randomFood(createSnake()));
+  const [foods, setFoods] = useState<Food[]>(() => spawnFoods(createSnake()));
   const [direction, setDirection] = useState<Direction>('right');
   const [nextDirection, setNextDirection] = useState<Direction>('right');
   const [gameState, setGameState] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting');
@@ -32,14 +33,14 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
   const directionRef = useRef(direction);
   const nextDirRef = useRef(nextDirection);
   const snakeRef = useRef(snake);
-  const foodRef = useRef(food);
+  const foodsRef = useRef(foods);
   const gameStateRef = useRef(gameState);
   const scoreRef = useRef(score);
 
   useEffect(() => { directionRef.current = direction; }, [direction]);
   useEffect(() => { nextDirRef.current = nextDirection; }, [nextDirection]);
   useEffect(() => { snakeRef.current = snake; }, [snake]);
-  useEffect(() => { foodRef.current = food; }, [food]);
+  useEffect(() => { foodsRef.current = foods; }, [foods]);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { scoreRef.current = score; }, [score]);
 
@@ -49,7 +50,7 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
   const reset = useCallback(() => {
     const s = createSnake();
     setSnake(s);
-    setFood(randomFood(s));
+    setFoods(spawnFoods(s));
     setDirection('right');
     setNextDirection('right');
     setGameState('waiting');
@@ -94,15 +95,15 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
     setDirection(nextDirRef.current);
 
     setSnake(prev => {
-      const { newSnake, ate, died } = moveSnake(prev, nextDirRef.current, foodRef.current);
+      const { newSnake, ateBit, died } = moveSnake(prev, nextDirRef.current, foodsRef.current);
       if (died) {
         setGameState('lost');
         return prev;
       }
-      if (ate) {
-        setFood(randomFood(newSnake));
+      if (ateBit !== null) {
+        setFoods(spawnFoods(newSnake));
         setScore(s => {
-          const newScore = s + 10;
+          const newScore = (s << 1) | ateBit;
           scoreRef.current = newScore;
           onScoreChange(newScore);
           return newScore;
@@ -138,16 +139,23 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
       ctx.stroke();
     }
 
-    const f = foodRef.current;
     const pulse = Math.sin(Date.now() / 200) * 0.05 + 1;
     const foodSize = CELL * 0.7 * pulse;
-    ctx.fillStyle = '#E66A2C';
-    ctx.beginPath();
-    ctx.arc(f.x * CELL + CELL / 2, f.y * CELL + CELL / 2, foodSize / 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#151515';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    foodsRef.current.forEach(f => {
+      ctx.fillStyle = f.bit === 1 ? '#E66A2C' : '#2C81E6';
+      ctx.beginPath();
+      ctx.arc(f.pos.x * CELL + CELL / 2, f.pos.y * CELL + CELL / 2, foodSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#151515';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `bold ${Math.floor(CELL * 0.5)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(f.bit.toString(), f.pos.x * CELL + CELL / 2, f.pos.y * CELL + CELL / 2 + 1);
+    });
 
     snake.forEach((seg, i) => {
       const x = seg.x * CELL;
@@ -202,7 +210,7 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
 
     const animId = requestAnimationFrame(() => { });
     return () => cancelAnimationFrame(animId);
-  }, [snake, food, direction, CANVAS_SIZE]);
+  }, [snake, foods, direction, CANVAS_SIZE]);
 
   return (
     <div className="relative">

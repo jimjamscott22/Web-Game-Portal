@@ -23,7 +23,12 @@ export function createSnake(): Position[] {
   ];
 }
 
-export function randomFood(snake: Position[]): Position {
+export interface Food {
+  pos: Position;
+  bit: 0 | 1;
+}
+
+export function randomFood(snake: Position[]): Food {
   const occupied = new Set(snake.map(s => `${s.x},${s.y}`));
   let pos: Position;
   do {
@@ -32,12 +37,31 @@ export function randomFood(snake: Position[]): Position {
       y: Math.floor(Math.random() * GRID_SIZE),
     };
   } while (occupied.has(`${pos.x},${pos.y}`));
-  return pos;
+  return { pos, bit: Math.random() < 0.5 ? 0 : 1 };
 }
 
-export function moveSnake(snake: Position[], direction: Direction, food: Position): {
+export function spawnFoods(snake: Position[]): [Food, Food] {
+  const occupied = new Set(snake.map(s => `${s.x},${s.y}`));
+  const getPos = () => {
+    let pos: Position;
+    do {
+      pos = {
+        x: Math.floor(Math.random() * GRID_SIZE),
+        y: Math.floor(Math.random() * GRID_SIZE),
+      };
+    } while (occupied.has(`${pos.x},${pos.y}`));
+    occupied.add(`${pos.x},${pos.y}`);
+    return pos;
+  };
+  return [
+    { pos: getPos(), bit: 0 },
+    { pos: getPos(), bit: 1 },
+  ];
+}
+
+export function moveSnake(snake: Position[], direction: Direction, foods: Food[]): {
   newSnake: Position[];
-  ate: boolean;
+  ateBit: 0 | 1 | null;
   died: boolean;
 } {
   const head = { ...snake[0] };
@@ -49,18 +73,18 @@ export function moveSnake(snake: Position[], direction: Direction, food: Positio
   }
 
   if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-    return { newSnake: snake, ate: false, died: true };
+    return { newSnake: snake, ateBit: null, died: true };
   }
 
   if (snake.some((seg, i) => i > 0 && seg.x === head.x && seg.y === head.y)) {
-    return { newSnake: snake, ate: false, died: true };
+    return { newSnake: snake, ateBit: null, died: true };
   }
 
-  const ate = head.x === food.x && head.y === food.y;
+  const eatenFood = foods.find(f => head.x === f.pos.x && head.y === f.pos.y);
   const newSnake = [head, ...snake];
-  if (!ate) newSnake.pop();
+  if (!eatenFood) newSnake.pop();
 
-  return { newSnake, ate, died: false };
+  return { newSnake, ateBit: eatenFood ? eatenFood.bit : null, died: false };
 }
 
 export function getOpposite(direction: Direction): Direction {
