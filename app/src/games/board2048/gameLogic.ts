@@ -44,7 +44,7 @@ function cloneBoard(board: (Tile | null)[][]): (Tile | null)[][] {
 }
 
 function slideLine(line: (Tile | null)[], scoreRef: { value: number }): (Tile | null)[] {
-  let filtered = line.filter((t): t is Tile => t !== null);
+  const filtered = line.filter((t): t is Tile => t !== null);
   const result: (Tile | null)[] = [];
   let i = 0;
   while (i < filtered.length) {
@@ -117,9 +117,10 @@ export function move(board: (Tile | null)[][], direction: Direction): {
 export function hasMoves(board: (Tile | null)[][]): boolean {
   for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 4; c++) {
-      if (!board[r][c]) return true;
-      if (c < 3 && board[r][c]!.value === board[r][c + 1]!.value) return true;
-      if (r < 3 && board[r][c]!.value === board[r + 1][c]!.value) return true;
+      const tile = board[r][c];
+      if (!tile) return true;
+      if (c < 3 && tile.value === board[r][c + 1]?.value) return true;
+      if (r < 3 && tile.value === board[r + 1][c]?.value) return true;
     }
   }
   return false;

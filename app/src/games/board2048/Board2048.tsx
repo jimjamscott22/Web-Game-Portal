@@ -23,7 +23,7 @@ interface Board2048Props {
   onGameOver: () => void;
 }
 
-export default function Board2048({ score, best: _best, onScoreChange, onGameOver }: Board2048Props) {
+export default function Board2048({ score, onScoreChange, onGameOver }: Board2048Props) {
   const [board, setBoard] = useState<(Tile | null)[][]>(() => {
     resetIdCounter();
     return createBoard();
@@ -48,29 +48,26 @@ export default function Board2048({ score, best: _best, onScoreChange, onGameOve
   const handleMove = useCallback((direction: Direction) => {
     if (gameOver || (won && !keepGoing)) return;
 
-    setBoard(prev => {
-      const { newBoard, scoreDelta, moved } = move(prev, direction);
-      if (!moved) return prev;
+    const { newBoard, scoreDelta, moved } = move(board, direction);
+    if (!moved) return;
 
-      onScoreChange(scoreDelta);
-      addRandomTile(newBoard);
+    addRandomTile(newBoard);
+    setBoard(newBoard);
+    onScoreChange(scoreDelta);
 
-      if (!hasMoves(newBoard)) {
-        setTimeout(() => {
-          setShake(true);
-          setGameOver(true);
-          onGameOver();
-          setTimeout(() => setShake(false), 400);
-        }, 200);
-      }
+    if (!hasMoves(newBoard)) {
+      setTimeout(() => {
+        setShake(true);
+        setGameOver(true);
+        onGameOver();
+        setTimeout(() => setShake(false), 400);
+      }, 200);
+    }
 
-      if (hasWon(newBoard) && !wonDisplayed) {
-        setWon(true);
-      }
-
-      return newBoard;
-    });
-  }, [gameOver, won, keepGoing, onScoreChange, onGameOver, wonDisplayed]);
+    if (hasWon(newBoard) && !wonDisplayed) {
+      setWon(true);
+    }
+  }, [board, gameOver, won, keepGoing, onScoreChange, onGameOver, wonDisplayed]);
 
   useKeyboard({
     arrowup: () => handleMove('up'),
