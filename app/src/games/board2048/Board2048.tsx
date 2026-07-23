@@ -55,7 +55,11 @@ export default function Board2048({ score, onScoreChange, onGameOver }: Board204
     setBoard(newBoard);
     onScoreChange(scoreDelta);
 
-    if (!hasMoves(newBoard)) {
+    // A move can hit 2048 and exhaust the board at the same time. Let the
+    // win overlay take priority; game-over is (re)checked once it's dismissed.
+    const justWon = hasWon(newBoard) && !wonDisplayed;
+
+    if (!justWon && !hasMoves(newBoard)) {
       setTimeout(() => {
         setShake(true);
         setGameOver(true);
@@ -64,10 +68,22 @@ export default function Board2048({ score, onScoreChange, onGameOver }: Board204
       }, 200);
     }
 
-    if (hasWon(newBoard) && !wonDisplayed) {
+    if (justWon) {
       setWon(true);
     }
   }, [board, gameOver, won, keepGoing, onScoreChange, onGameOver, wonDisplayed]);
+
+  const handleKeepGoing = useCallback(() => {
+    setWonDisplayed(true);
+    setKeepGoing(true);
+
+    if (!hasMoves(board)) {
+      setShake(true);
+      setGameOver(true);
+      onGameOver();
+      setTimeout(() => setShake(false), 400);
+    }
+  }, [board, onGameOver]);
 
   useKeyboard({
     arrowup: () => handleMove('up'),
@@ -139,7 +155,7 @@ export default function Board2048({ score, onScoreChange, onGameOver }: Board204
         <WinOverlay
           title="You Win!"
           color="#FCB630"
-          onKeepGoing={() => { setWonDisplayed(true); setKeepGoing(true); }}
+          onKeepGoing={handleKeepGoing}
           onNewGame={reset}
         />
       )}
