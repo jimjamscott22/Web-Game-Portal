@@ -89,6 +89,17 @@ export const GAMES: GameConfig[] = [
     difficulties: ['Easy', 'Medium', 'Hard'],
     defaultDifficulty: 'Easy',
   },
+  {
+    id: 'gate-grid',
+    title: 'Gate Grid',
+    description: 'Assign AND, OR, XOR, NAND, and NOR gates into a fixed circuit and toggle wire inverters until your truth table matches the target.',
+    color: '#2ED8A7',
+    bgColor: '#2ED8A7',
+    route: '/gate-grid',
+    previewImage: '/assets/card-preview-gate-grid.svg',
+    difficulties: ['Beginner', 'Intermediate', 'Expert'],
+    defaultDifficulty: 'Beginner',
+  },
 ];
 
 export const NAV_GAMES: NavGame[] = GAMES.map(g => ({
