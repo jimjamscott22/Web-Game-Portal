@@ -89,6 +89,9 @@ export const GAMES: GameConfig[] = [
     difficulties: ['Easy', 'Medium', 'Hard'],
     defaultDifficulty: 'Easy',
   },
+  { id: 'memory-match', title: 'Memory Match', description: 'Flip pixel cards, remember their symbols, and match every pair.', color: '#8ABAC5', bgColor: '#8ABAC5', route: '/memory-match', previewImage: '/assets/card-preview-memory-match.svg', difficulties: ['Easy','Medium','Hard'], defaultDifficulty: 'Easy' },
+  { id: 'lights-out', title: 'Lights Out', description: 'Toggle each light and its neighbors until the whole grid goes dark.', color: '#FDC846', bgColor: '#FDC846', route: '/lights-out', previewImage: '/assets/card-preview-lights-out.svg', difficulties: ['Easy','Medium','Hard'], defaultDifficulty: 'Easy' },
+  { id: 'simon-says', title: 'Simon Says', description: 'Watch the colorful sequence grow, then repeat every flash from memory.', color: '#F76CA5', bgColor: '#F76CA5', route: '/simon-says', previewImage: '/assets/card-preview-simon-says.svg', difficulties: ['Easy','Medium','Hard'], defaultDifficulty: 'Easy' },
 ];
 
 export const NAV_GAMES: NavGame[] = GAMES.map(g => ({
