@@ -2,10 +2,12 @@
 
 A colorful, retro-pixel arcade that brings ten browser games together in one responsive React application. Jump straight into an arcade classic, tackle a logic puzzle, or test your memory—no account or installation required.
 
+## Organic Theme Preview
+
 <p align="center">
-  <img src="app/public/assets/card-preview-2048.png" alt="2048 game preview" width="30%">
-  <img src="app/public/assets/card-preview-snake.png" alt="Snake game preview" width="30%">
-  <img src="app/public/assets/card-preview-tetris.png" alt="Tetris game preview" width="30%">
+  <img src="docs/assets/pixelplay-organic-harvest.png" alt="PixelPlay Organic theme home-page concept using the Harvest skin" width="100%">
+  <br>
+  <em>Organic theme concept — Harvest skin. This handoff mockup predates Gate Grid.</em>
 </p>
 
 ## Games
