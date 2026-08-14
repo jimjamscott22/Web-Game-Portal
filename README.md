@@ -1,63 +1,131 @@
-# Web Game Portal
+# PixelPlay — Web Game Portal
 
-A retro-pixel arcade portal built by **Kimi-OKComputer** that bundles five classic games into a single React + TypeScript + Vite app: **2048**, **Minesweeper**, **Snake**, **Sudoku**, and **Tetris**.
+A colorful, retro-pixel arcade that brings ten browser games together in one responsive React application. Jump straight into an arcade classic, tackle a logic puzzle, or test your memory—no account or installation required.
+
+<p align="center">
+  <img src="app/public/assets/card-preview-2048.png" alt="2048 game preview" width="30%">
+  <img src="app/public/assets/card-preview-snake.png" alt="Snake game preview" width="30%">
+  <img src="app/public/assets/card-preview-tetris.png" alt="Tetris game preview" width="30%">
+</p>
+
+## Games
+
+| Game | Challenge |
+| --- | --- |
+| **2048** | Slide and merge matching tiles to reach 2048. |
+| **Minesweeper** | Use numbered clues to uncover every safe square. |
+| **Snake** | Collect binary bits, grow longer, and avoid collisions. |
+| **Tetris** | Arrange falling pieces, clear lines, and keep the stack low. |
+| **Sudoku** | Complete a 9×9 grid without repeating digits in any row, column, or box. |
+| **Binairo** | Balance 0s and 1s while keeping every row and column unique. |
+| **Gate Grid** | Configure logic gates and inverters to match a target truth table. |
+| **Memory Match** | Find every matching pair in as few moves as possible. |
+| **Lights Out** | Toggle neighboring lights until the entire board goes dark. |
+| **Simon Says** | Memorize and repeat a sequence that grows each round. |
+
+## Highlights
+
+- Ten games spanning arcade, number, logic, and memory challenges
+- Responsive layouts with keyboard and pointer or touch input
+- Multiple difficulty or board-size options on supported games
+- Locally saved best scores, rounds, moves, or times where available
+- Lazy-loaded game routes for a smaller initial bundle
+- A shared retro-pixel interface with animated transitions and reusable game components
 
 ## Tech Stack
 
-- **React 19** + **TypeScript** + **Vite 7**
-- **Tailwind CSS 3.4** with the **shadcn/ui** theme (40+ Radix-based UI primitives in [src/components/ui/](src/components/ui/))
-- **react-router 7** (HashRouter) for page routing
-- **GSAP** for animation, **lucide-react** for icons
-- **ESLint 9** with `typescript-eslint` and React hooks plugins
+- **React 19** and **TypeScript 5.9**
+- **Vite 7** for development and production builds
+- **Tailwind CSS 3.4** with shadcn/ui and Radix UI primitives
+- **React Router 7** with hash-based routing for static hosting
+- **GSAP** for animation and **Lucide React** for icons
+- **ESLint 9** with TypeScript and React Hooks rules
+
+## Getting Started
+
+### Requirements
+
+- Node.js `^20.19.0` or `>=22.12.0`
+- npm
+
+### Install and run
+
+```bash
+git clone https://github.com/jimjamscott22/Web-Game-Portal.git
+cd Web-Game-Portal/app
+npm install
+npm run dev
+```
+
+Vite will print the local development URL, typically `http://localhost:5173`.
+
+## Available Scripts
+
+Run these commands from `app/`:
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite development server. |
+| `npm run build` | Type-check the application and create a production build in `app/dist/`. |
+| `npm run preview` | Serve the production build locally. |
+| `npm run lint` | Run ESLint across the application. |
 
 ## Project Structure
 
 ```text
 app/
-├── index.html              # Vite entry HTML
-├── public/assets/          # Card previews, hero/background art, floating sprites
+├── public/
+│   └── assets/                 # Game cards, backgrounds, and decorative artwork
 ├── src/
-│   ├── main.tsx            # React entry point
-│   ├── App.tsx             # Router + layout shell
-│   ├── index.css / App.css # Global + app-level styles
-│   ├── pages/              # Route screens: Home + one Game{Name}.tsx per game
-│   ├── sections/           # Home page sections (HeroBanner, GameShowcase, QuickPlayCTA)
-│   ├── components/         # Shared UI: NavigationBar, Footer, GameCard, overlays,
-│   │   │                   #   PixelButton, ScoreBox, MobileControls, etc.
-│   │   └── ui/             # shadcn/ui primitives
-│   ├── games/              # One folder per game, each with Board{Name}.tsx + gameLogic.ts
+│   ├── main.tsx                # React entry point and HashRouter setup
+│   ├── App.tsx                 # Shared shell, transitions, and lazy-loaded routes
+│   ├── pages/                  # Home screen and one page per game
+│   ├── sections/               # Home-page hero, game showcase, and call to action
+│   ├── components/             # Shared game layout and interface components
+│   │   └── ui/                 # shadcn/ui and Radix-based primitives
+│   ├── games/
 │   │   ├── board2048/
+│   │   ├── boardBinairo/
+│   │   ├── boardGateGrid/
+│   │   ├── boardLightsOut/
+│   │   ├── boardMemoryMatch/
 │   │   ├── boardMinesweeper/
+│   │   ├── boardSimonSays/
 │   │   ├── boardSnake/
 │   │   ├── boardSudoku/
-│   │   └── boardTetris/
-│   ├── hooks/              # useGameLoop, useKeyboard, useSwipe, useLocalStorage, use-mobile
-│   ├── lib/utils.ts        # cn() and shared helpers
-│   └── types/index.ts      # Shared TypeScript types
-├── tailwind.config.js      # Theme (shadcn tokens, custom colors, animations)
-├── postcss.config.js
+│   │   └── boardTetris/        # Board components and game-specific logic
+│   ├── hooks/                  # Keyboard, swipe, game-loop, and storage hooks
+│   ├── lib/                    # Shared utilities
+│   └── types/                  # Game registry and shared TypeScript types
+├── tests/                      # Targeted regression tests
+├── package.json
+├── tailwind.config.js
 ├── vite.config.ts
 └── tsconfig*.json
 ```
 
-The architecture cleanly separates **presentation** (`pages/`, `sections/`, `components/`) from **game logic** (`games/<name>/gameLogic.ts`), with reusable hooks for input handling and the game loop. Each game has a dedicated page that mounts its `Board*` component.
+## Architecture
 
-## Setup & Run
+Each game has a route-level page in `src/pages/` and a dedicated folder in `src/games/`. Page components own presentation concerns such as scores, difficulty controls, and overlays. Board components handle interaction and delegate reusable rules or puzzle generation to their neighboring `gameLogic.ts` modules.
 
-**Requirements:** Node.js 20+ and npm (or pnpm/yarn/bun).
+Shared components provide consistent headers, controls, score displays, instructions, and win or game-over states. Common hooks centralize keyboard input, swipe gestures, animation loops, and local-storage access.
+
+## Verification
+
+Create a production build:
 
 ```bash
 cd app
-npm install          # install dependencies
-npm run dev          # start the Vite dev server (default: http://localhost:5173)
+npm run build
 ```
 
-### Other scripts
+Run the targeted 2048 game-logic regression tests:
 
 ```bash
-npm run build        # type-check (tsc -b) and build production bundle to dist/
-npm run preview      # serve the production build locally
-npm run lint         # run ESLint
+cd app
+node --experimental-strip-types --test tests/gameLogic.test.ts
 ```
 
-After `npm run build`, deploy the contents of `dist/` to any static host (Vercel, Netlify, GitHub Pages, S3, etc.).
+## Deployment
+
+`npm run build` produces a static application in `app/dist/`. The hash-based routes work without server-side rewrite rules, so the directory can be deployed to services such as GitHub Pages, Netlify, Vercel, or an object-storage static host.
