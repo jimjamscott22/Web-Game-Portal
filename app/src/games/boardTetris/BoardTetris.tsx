@@ -15,6 +15,8 @@ import { useKeyboard } from '@/hooks/useKeyboard';
 import { useGameLoop } from '@/hooks/useGameLoop';
 import GameOverOverlay from '@/components/GameOverOverlay';
 import MobileControls from '@/components/MobileControls';
+import ScoreBox from '@/components/ScoreBox';
+import { useSkinTokens } from '@/theme/tokens';
 
 interface BoardTetrisProps {
   onScoreChange: (score: number) => void;
@@ -22,7 +24,13 @@ interface BoardTetrisProps {
   onLinesChange: (lines: number) => void;
 }
 
+const CANVAS_TOKENS = [
+  '--t-board', '--t-cell', '--t-accent-soft', '--t-line',
+  '--t-p1', '--t-p2', '--t-p3', '--t-p4', '--t-p5', '--t-p6', '--t-p7',
+] as const;
+
 export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChange }: BoardTetrisProps) {
+  const tokens = useSkinTokens(CANVAS_TOKENS);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nextCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -55,6 +63,16 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
   const CELL = 26;
   const CANVAS_W = COLS * CELL;
   const CANVAS_H = ROWS * CELL;
+
+  /** `color` is a token name from TETROMINOES; resolve it for the live skin. */
+  const drawBlock = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, color: string, size = CELL) => {
+    const px = x * size;
+    const py = y * size;
+    ctx.fillStyle = tokens[color as keyof typeof tokens] ?? color;
+    ctx.beginPath();
+    ctx.roundRect(px + 1, py + 1, size - 2, size - 2, Math.min(6, size / 4));
+    ctx.fill();
+  }, [tokens]);
 
   const spawnPiece = useCallback(() => {
     const p = nextPiece;
@@ -142,23 +160,26 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#1A1A2E';
+    // Board sits on --t-board with --t-cell holes.
+    ctx.fillStyle = tokens['--t-board'];
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-    ctx.lineWidth = 1;
-    for (let x = 0; x <= COLS; x++) {
-      ctx.beginPath(); ctx.moveTo(x * CELL, 0); ctx.lineTo(x * CELL, CANVAS_H); ctx.stroke();
-    }
-    for (let y = 0; y <= ROWS; y++) {
-      ctx.beginPath(); ctx.moveTo(0, y * CELL); ctx.lineTo(CANVAS_W, y * CELL); ctx.stroke();
+    ctx.fillStyle = tokens['--t-cell'];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        ctx.beginPath();
+        ctx.roundRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2, 4);
+        ctx.fill();
+      }
     }
 
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         if (flashLines.includes(r)) {
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
+          ctx.fillStyle = tokens['--t-accent-soft'];
+          ctx.beginPath();
+          ctx.roundRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2, 4);
+          ctx.fill();
           continue;
         }
         if (board[r][c]) {
@@ -183,11 +204,11 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#F5F5F5';
-    ctx.fillRect(0, 0, 120, 120);
-    ctx.strokeStyle = '#151515';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(0, 0, 120, 120);
+    ctx.clearRect(0, 0, 120, 120);
+    ctx.fillStyle = tokens['--t-board'];
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 120, 120, 16);
+    ctx.fill();
 
     const np = nextPiece;
     const offX = Math.floor((4 - np.shape[0].length) / 2);
@@ -199,19 +220,8 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
         }
       }
     }
-  }, [nextPiece]);
+  }, [nextPiece, tokens, drawBlock]);
 
-  function drawBlock(ctx: CanvasRenderingContext2D, x: number, y: number, color: string, size = CELL) {
-    const px = x * size;
-    const py = y * size;
-    ctx.fillStyle = color;
-    ctx.fillRect(px + 1, py + 1, size - 2, size - 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(px + 2, py + 2, size - 4, size - 4);
-    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-    ctx.strokeRect(px + 1, py + 1, size - 2, size - 2);
-  }
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
@@ -220,13 +230,12 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
           ref={canvasRef}
           width={CANVAS_W}
           height={CANVAS_H}
-          className="rounded-lg border-[4px] border-dark block"
+          className="rounded-card block"
         />
         {gameState === 'lost' && (
           <GameOverOverlay
-            title="Game Over!"
-            subtitle={`Score: ${score}`}
-            color="#F76CA5"
+            title="Stack topped out"
+            score={score}
             onTryAgain={() => {
               setBoard(Array.from({ length: ROWS }, () => Array(COLS).fill(null)));
               setPiece(randomPiece());
@@ -245,30 +254,19 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
       </div>
 
       <div className="flex flex-col gap-4 min-w-[140px]">
-        <div>
-          <p className="font-pixel text-sm text-dark mb-1">Next</p>
-          <canvas ref={nextCanvasRef} width={120} height={120} className="rounded-xl border-[3px] border-dark" />
+        <div className="card p-4">
+          <p className="font-body text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-2">Next</p>
+          <canvas ref={nextCanvasRef} width={120} height={120} className="rounded-tile" />
         </div>
 
-        <div className="bg-game-pink rounded-xl border-[3px] border-dark p-3 text-center">
-          <p className="font-body text-[10px] uppercase tracking-wider text-white/70">Score</p>
-          <p className="font-pixel text-2xl font-bold text-white">{score}</p>
-        </div>
+        <ScoreBox label="Score" value={score} className="w-full" />
+        <ScoreBox label="Level" value={level} tone="surface" className="w-full" />
+        <ScoreBox label="Lines" value={lines} tone="surface" className="w-full" />
 
-        <div className="bg-white rounded-xl border-[3px] border-dark p-3 text-center">
-          <p className="font-body text-[10px] uppercase tracking-wider text-dark/70">Level</p>
-          <p className="font-pixel text-2xl font-bold text-dark">{level}</p>
-        </div>
-
-        <div className="bg-secondary rounded-xl border-[3px] border-dark p-3 text-center">
-          <p className="font-body text-[10px] uppercase tracking-wider text-dark/70">Lines</p>
-          <p className="font-pixel text-2xl font-bold text-dark">{lines}</p>
-        </div>
-
-        <div className="text-xs text-dark/60 font-body space-y-1">
-          <p>Left/Right: Move</p>
-          <p>Down: Soft drop</p>
-          <p>Up/Space: Rotate</p>
+        <div className="font-body text-xs text-muted-foreground space-y-1">
+          <p>Left/Right: move</p>
+          <p>Down: soft drop</p>
+          <p>Up/Space: rotate</p>
         </div>
 
         <MobileControls
@@ -277,7 +275,7 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
           onDown={() => move(0, 1)}
           onRotate={rotate}
           showRotate
-          color="#F76CA5"
+          color="var(--t-s4)"
         />
       </div>
     </div>

@@ -115,10 +115,10 @@ export default function BoardMinesweeper() {
           <button
             key={diff.name}
             onClick={() => handleDifficultyChange(idx)}
-            className={`font-pixel text-xs px-3 py-1.5 rounded-pill border-[2px] border-dark transition-all ${
+            className={`font-body text-[13px] px-4 py-2 rounded-pill transition-colors ${
               idx === difficultyIndex
-                ? 'bg-game-blue text-white'
-                : 'bg-white text-dark hover:bg-gray-100'
+                ? 'bg-accent text-accent-foreground font-semibold'
+                : 'border border-line text-muted-foreground hover:bg-panel'
             }`}
           >
             {diff.name}
@@ -126,16 +126,19 @@ export default function BoardMinesweeper() {
         ))}
         <button
           onClick={() => setFlagMode(!flagMode)}
-          className={`font-pixel text-xs px-3 py-1.5 rounded-pill border-[2px] border-dark transition-all ${
-            flagMode ? 'bg-game-orange text-white' : 'bg-white text-dark hover:bg-gray-100'
+          aria-pressed={flagMode}
+          className={`font-body text-[13px] px-4 py-2 rounded-pill transition-colors ${
+            flagMode
+              ? 'bg-second text-accent-foreground font-semibold'
+              : 'border border-line text-muted-foreground hover:bg-panel'
           }`}
         >
-          Flag Mode {flagMode ? 'ON' : 'OFF'}
+          Flag mode {flagMode ? 'on' : 'off'}
         </button>
       </div>
 
       <div
-        className="inline-grid gap-0 border-[3px] border-dark rounded-lg overflow-hidden select-none"
+        className="inline-grid gap-[2px] rounded-card bg-board p-3 overflow-hidden select-none"
         style={{
           gridTemplateColumns: `repeat(${difficulty.cols}, ${cellSize}px)`,
         }}
@@ -152,14 +155,14 @@ export default function BoardMinesweeper() {
                 key={`${r}-${c}`}
                 onClick={() => handleCellClick(r, c)}
                 onContextMenu={(e) => handleRightClick(e, r, c)}
-                className={`flex items-center justify-center font-pixel font-bold transition-all duration-100 ${
+                className={`flex items-center justify-center rounded-sm font-pixel font-bold transition-all duration-100 ${
                   isRevealed
                     ? isMine
-                      ? 'bg-red-500 text-white'
-                      : 'bg-[#E8F4F6] border border-[#CCCCCC]'
+                      ? 'bg-err'
+                      : 'bg-surface'
                     : isFlagged
-                    ? 'bg-[#FDC846]/30 border-2 border-dark'
-                    : 'bg-game-blue border-2 border-[#A8D0D8] active:translate-y-0.5 active:shadow-inner hover:bg-[#9BC5D0]'
+                    ? 'bg-accent-soft'
+                    : 'bg-cell hover:bg-panel active:translate-y-px'
                 }`}
                 style={{
                   width: cellSize,
@@ -169,12 +172,15 @@ export default function BoardMinesweeper() {
                   cursor: isRevealed ? 'default' : 'pointer',
                 }}
               >
+                {/* Mines and flags are accent discs, not glyphs. */}
                 {isRevealed && cell.isMine && (
-                  <span className="text-lg">💣</span>
+                  <span className="block rounded-full bg-accent-foreground" style={{ width: cellSize * 0.4, height: cellSize * 0.4 }} />
                 )}
                 {isRevealed && !cell.isMine && cell.adjacentMines > 0 && cell.adjacentMines}
-                {isFlagged && <span className="text-sm">🚩</span>}
-                {isQuestion && <span className="text-dark/60">?</span>}
+                {isFlagged && (
+                  <span className="block rounded-full bg-accent" style={{ width: cellSize * 0.36, height: cellSize * 0.36 }} />
+                )}
+                {isQuestion && <span className="text-muted-foreground">?</span>}
               </button>
             );
           })
@@ -182,19 +188,10 @@ export default function BoardMinesweeper() {
       </div>
 
       {gameState === 'won' && (
-        <WinOverlay
-          title="You Win!"
-          color="#8ABAC5"
-          onKeepGoing={() => setGameState('playing')}
-          onNewGame={() => reset()}
-        />
+        <WinOverlay title="Field cleared" onNewGame={() => reset()} />
       )}
       {gameState === 'lost' && (
-        <GameOverOverlay
-          title="BOOM!"
-          color="#E66A2C"
-          onTryAgain={() => reset()}
-        />
+        <GameOverOverlay title="Boom" subtitle="You hit a mine." onTryAgain={() => reset()} />
       )}
     </div>
   );

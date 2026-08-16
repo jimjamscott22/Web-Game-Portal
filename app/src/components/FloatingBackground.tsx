@@ -1,21 +1,15 @@
 import { useMemo } from 'react';
 
-const SHAPES = ['square', 'circle', 'plus'] as const;
-const COLORS = [
-  'rgba(252,182,48,0.06)',
-  'rgba(140,194,152,0.06)',
-  'rgba(138,186,197,0.06)',
-  'rgba(247,108,165,0.06)',
-  'rgba(230,106,44,0.06)',
-];
+// Organic ground: soft drifting discs, no hard-edged squares or plus signs.
+const TOKENS = ['--t-accent', '--t-second', '--t-accent-soft', '--t-second-soft', '--t-accent-deep'];
+const COLORS = TOKENS.map((token) => `color-mix(in srgb, var(${token}) 12%, transparent)`);
 
 export default function FloatingBackground() {
   const elements = useMemo(() => {
-    return Array.from({ length: 18 }, (_, i) => ({
+    return Array.from({ length: 9 }, (_, i) => ({
       id: i,
-      shape: SHAPES[i % SHAPES.length],
       color: COLORS[i % COLORS.length],
-      size: 16 + Math.random() * 32,
+      size: 90 + Math.random() * 190,
       left: Math.random() * 100,
       top: Math.random() * 100,
       duration: 8 + Math.random() * 6,
@@ -39,30 +33,7 @@ export default function FloatingBackground() {
             animationDelay: `${el.delay}s`,
           }}
         >
-          {el.shape === 'square' && (
-            <div
-              className="w-full h-full rounded-sm"
-              style={{ backgroundColor: el.color }}
-            />
-          )}
-          {el.shape === 'circle' && (
-            <div
-              className="w-full h-full rounded-full"
-              style={{ backgroundColor: el.color }}
-            />
-          )}
-          {el.shape === 'plus' && (
-            <div className="w-full h-full relative" style={{ color: el.color }}>
-              <div
-                className="absolute top-1/2 left-0 right-0 h-[20%] -translate-y-1/2"
-                style={{ backgroundColor: el.color }}
-              />
-              <div
-                className="absolute left-1/2 top-0 bottom-0 w-[20%] -translate-x-1/2"
-                style={{ backgroundColor: el.color }}
-              />
-            </div>
-          )}
+          <div className="w-full h-full rounded-full" style={{ backgroundColor: el.color }} />
         </div>
       ))}
     </div>

@@ -135,22 +135,24 @@ export function hasWon(board: (Tile | null)[][]): boolean {
   return false;
 }
 
+// The Organic tile ladder. Every step is a skin token so the board re-themes
+// with the rest of the portal — see `--t-t*` in src/index.css.
 export const TILE_COLORS: Record<number, { bg: string; text: string }> = {
-  2: { bg: '#FFFFFF', text: '#151515' },
-  4: { bg: '#FEF1CD', text: '#151515' },
-  8: { bg: '#FCB630', text: '#FFFFFF' },
-  16: { bg: '#E66A2C', text: '#FFFFFF' },
-  32: { bg: '#F76CA5', text: '#FFFFFF' },
-  64: { bg: '#E0407B', text: '#FFFFFF' },
-  128: { bg: '#8ABAC5', text: '#FFFFFF' },
-  256: { bg: '#8ABAC5', text: '#FFFFFF' },
-  512: { bg: '#8ABAC5', text: '#FFFFFF' },
-  1024: { bg: '#8ABAC5', text: '#FFFFFF' },
-  2048: { bg: '#4E6E71', text: '#FFFFFF' },
+  2: { bg: 'var(--t-t2)', text: 'var(--t-t2f)' },
+  4: { bg: 'var(--t-t4)', text: 'var(--t-t4f)' },
+  8: { bg: 'var(--t-t8)', text: 'var(--t-t8f)' },
+  16: { bg: 'var(--t-t16)', text: 'var(--t-t16f)' },
+  32: { bg: 'var(--t-t32)', text: 'var(--t-t32f)' },
+  64: { bg: 'var(--t-t64)', text: 'var(--t-t64f)' },
+  128: { bg: 'var(--t-t128)', text: 'var(--t-t128f)' },
+  256: { bg: 'var(--t-t256)', text: 'var(--t-t256f)' },
+  512: { bg: 'var(--t-t512)', text: 'var(--t-t512f)' },
+  1024: { bg: 'var(--t-t1024)', text: 'var(--t-t1024f)' },
+  2048: { bg: 'var(--t-t2048)', text: 'var(--t-t2048f)' },
 };
 
 export function getTileColor(value: number): { bg: string; text: string } {
-  return TILE_COLORS[value] || { bg: '#4E6E71', text: '#FFFFFF' };
+  return TILE_COLORS[value] || { bg: 'var(--t-t2048)', text: 'var(--t-t2048f)' };
 }
 
 export function getTileFontSize(value: number): string {

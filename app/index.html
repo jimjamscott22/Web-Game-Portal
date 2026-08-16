@@ -7,7 +7,17 @@
     <title>PixelPlay - Game Arcade Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Pixelify+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&family=Pixelify+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+      // Paint the stored skin before first render so there is no flash of the
+      // default Harvest palette. Mirrors SKIN_STORAGE_KEY in src/theme/skins.ts.
+      try {
+        var s = JSON.parse(localStorage.getItem('pixelplay-skin'));
+        if (s === 'harvest' || s === 'meadow' || s === 'dusk' || s === 'clay') {
+          document.documentElement.dataset.skin = s;
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

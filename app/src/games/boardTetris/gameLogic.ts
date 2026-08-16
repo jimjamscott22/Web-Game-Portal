@@ -8,14 +8,19 @@ export interface Piece {
   y: number;
 }
 
+/**
+ * `color` is a skin token *name*, not a literal — the seven pieces map onto
+ * seven ramp steps (accent 300/500/700, accent-2 300/500/700, neutral 600)
+ * and the board resolves them at draw time so pieces follow the active skin.
+ */
 export const TETROMINOES: { shape: number[][]; color: string }[] = [
-  { shape: [[1, 1, 1, 1]], color: '#00BCD4' },
-  { shape: [[1, 1], [1, 1]], color: '#FDC846' },
-  { shape: [[0, 1, 0], [1, 1, 1]], color: '#9C27B0' },
-  { shape: [[0, 1, 1], [1, 1, 0]], color: '#4CAF50' },
-  { shape: [[1, 1, 0], [0, 1, 1]], color: '#F44336' },
-  { shape: [[1, 0, 0], [1, 1, 1]], color: '#2196F3' },
-  { shape: [[0, 0, 1], [1, 1, 1]], color: '#FF9800' },
+  { shape: [[1, 1, 1, 1]], color: '--t-p1' },
+  { shape: [[1, 1], [1, 1]], color: '--t-p2' },
+  { shape: [[0, 1, 0], [1, 1, 1]], color: '--t-p3' },
+  { shape: [[0, 1, 1], [1, 1, 0]], color: '--t-p4' },
+  { shape: [[1, 1, 0], [0, 1, 1]], color: '--t-p5' },
+  { shape: [[1, 0, 0], [1, 1, 1]], color: '--t-p6' },
+  { shape: [[0, 0, 1], [1, 1, 1]], color: '--t-p7' },
 ];
 
 export function randomPiece(): Piece {

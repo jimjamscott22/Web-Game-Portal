@@ -1,25 +1,40 @@
+import { cn } from '@/lib/utils';
+
 interface ScoreBoxProps {
   label: string;
-  value: number;
-  bgColor?: string;
-  textColor?: string;
+  value: number | string;
+  /** `accent` is the live score, `surface` the personal best. */
+  tone?: 'accent' | 'surface';
+  className?: string;
 }
 
-export default function ScoreBox({
-  label,
-  value,
-  bgColor = '#FCB630',
-  textColor = '#151515',
-}: ScoreBoxProps) {
+export default function ScoreBox({ label, value, tone = 'accent', className }: ScoreBoxProps) {
+  const accent = tone === 'accent';
+
   return (
     <div
-      className="rounded-tile border-[3px] border-dark px-4 py-2 min-w-[80px] text-center"
-      style={{ backgroundColor: bgColor }}
+      className={cn(
+        'rounded-tile px-[18px] py-[9px] min-w-[86px] text-center',
+        accent
+          ? 'bg-accent shadow-button'
+          : 'bg-surface border border-line',
+        className
+      )}
     >
-      <div className="font-body text-[10px] font-medium uppercase tracking-wider" style={{ color: textColor, opacity: 0.7 }}>
+      <div
+        className={cn(
+          'font-body text-[10px] font-semibold uppercase tracking-[0.12em]',
+          accent ? 'text-accent-foreground opacity-85' : 'text-muted-foreground'
+        )}
+      >
         {label}
       </div>
-      <div className="font-pixel text-2xl font-bold" style={{ color: textColor }}>
+      <div
+        className={cn(
+          'font-pixel text-2xl font-bold leading-[1.2]',
+          accent ? 'text-accent-foreground' : 'text-ink'
+        )}
+      >
         {value}
       </div>
     </div>

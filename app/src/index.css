@@ -2,61 +2,397 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Organic skins.
+
+   Every colour in the app comes from a `--t-*` token defined here. Four skins
+   redefine the same key set, so a single `data-skin` attribute on <html>
+   re-themes the portal and all ten boards. Components must never hardcode a
+   hex — if a value is missing, add a token.
+
+   Fixed reference ramps (`--o-*`) are the OKLCH-derived Organic scales from
+   the design system; they never change with the skin and exist so skin blocks
+   below read as steps rather than magic numbers.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 @layer base {
   :root {
-    --background: 0 0% 96%;
-    --foreground: 0 0% 8%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
-    --primary: 180 18% 37%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 43 97% 63%;
-    --secondary-foreground: 0 0% 8%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 336 90% 69%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 8%;
-    --input: 0 0% 90%;
-    --ring: 336 90% 69%;
-    --radius: 0.625rem;
+    --o-neutral-100: #f9f4ed;
+    --o-neutral-300: #dcd3c4;
+    --o-neutral-500: #a19786;
+    --o-neutral-700: #645c50;
+    --o-neutral-900: #2e2b25;
+
+    --o-accent-100: #fff2eb;
+    --o-accent-300: #ffc6a5;
+    --o-accent-500: #d67f48;
+    --o-accent-700: #8c491a;
+    --o-accent-900: #402310;
+
+    --o-accent-2-100: #f0fae1;
+    --o-accent-2-300: #ccdbb2;
+    --o-accent-2-500: #8fa073;
+    --o-accent-2-700: #56633f;
+    --o-accent-2-900: #272e1b;
+
+    --radius: 16px;
+
+    /* Fixed contrast pair for surfaces whose colour is chosen at runtime. */
+    --t-on-light: #201e1d;
+    --t-on-dark: #f9f4ed;
+  }
+
+  /* ── Harvest — the house palette (also the no-attribute default) ────────── */
+  :root,
+  html[data-skin='harvest'] {
+    --t-bg: #f5ead8;
+    --t-panel: #ebddc5;
+    --t-card: #f9f4ed;
+    --t-ink: #201e1d;
+    --t-muted: #645c50;
+    --t-accent: #c67139;
+    --t-accent-soft: #ffe1d0;
+    --t-accent-deep: #8c491a;
+    --t-accent-hover: #b2622d;
+    --t-on-accent: #f5ead8;
+    --t-second: #7a8a5e;
+    --t-second-soft: #e1eecc;
+    --t-line: rgba(32, 30, 29, 0.16);
+    --t-drop: #dcd3c4;
+    --t-scrim: rgba(32, 30, 29, 0.55);
+    --t-hero: linear-gradient(135deg, #f0fae1 0%, #f5ead8 55%, #ffe1d0 100%);
+    --t-board: #dcd3c4;
+    --t-cell: rgba(255, 255, 255, 0.45);
+    --t-ok: #56633f;
+    --t-err: #8c491a;
+
+    --t-t2: #f9f4ed;      --t-t2f: #201e1d;
+    --t-t4: #ffe1d0;      --t-t4f: #8c491a;
+    --t-t8: #f6a06b;      --t-t8f: #402310;
+    --t-t16: #c67139;     --t-t16f: #f5ead8;
+    --t-t32: #b2622d;     --t-t32f: #fff2eb;
+    --t-t64: #8fa073;     --t-t64f: #f0fae1;
+    --t-t128: #728157;    --t-t128f: #f0fae1;
+    --t-t256: #56633f;    --t-t256f: #e1eecc;
+    --t-t512: #8c491a;    --t-t512f: #ffe1d0;
+    --t-t1024: #643312;   --t-t1024f: #ffc6a5;
+    --t-t2048: #402310;   --t-t2048f: #ffc6a5;
+
+    --t-s1: #c67139;  --t-s2: #7a8a5e;  --t-s3: #d67f48;  --t-s4: #8fa073;
+    --t-s5: #b2622d;  --t-s6: #aebf92;  --t-s7: #f6a06b;  --t-s8: #56633f;
+    --t-s9: #8c491a;  --t-s10: #a19786;
+
+    --t-p1: #ffc6a5;  --t-p2: #d67f48;  --t-p3: #8c491a;  --t-p4: #ccdbb2;
+    --t-p5: #8fa073;  --t-p6: #56633f;  --t-p7: #82796a;
+
+    --t-num1: #b2622d; --t-num2: #56633f; --t-num3: #8c491a; --t-num4: #3d472b;
+    --t-num5: #643312; --t-num6: #728157; --t-num7: #402310; --t-num8: #82796a;
+  }
+
+  /* ── Meadow — sage leads, terracotta answers ───────────────────────────── */
+  html[data-skin='meadow'] {
+    --t-bg: #f0fae1;
+    --t-panel: #e1eecc;
+    --t-card: #f9f4ed;
+    --t-ink: #272e1b;
+    --t-muted: #56633f;
+    --t-accent: #728157;
+    --t-accent-soft: #e1eecc;
+    --t-accent-deep: #3d472b;
+    --t-accent-hover: #56633f;
+    --t-on-accent: #f0fae1;
+    --t-second: #c67139;
+    --t-second-soft: #ffe1d0;
+    --t-line: rgba(39, 46, 27, 0.16);
+    --t-drop: #ccdbb2;
+    --t-scrim: rgba(39, 46, 27, 0.55);
+    --t-hero: linear-gradient(135deg, #e1eecc 0%, #f0fae1 55%, #f5ead8 100%);
+    --t-board: #ccdbb2;
+    --t-cell: rgba(255, 255, 255, 0.5);
+    --t-ok: #3d472b;
+    --t-err: #b2622d;
+
+    --t-t2: #f9f4ed;      --t-t2f: #272e1b;
+    --t-t4: #e1eecc;      --t-t4f: #3d472b;
+    --t-t8: #aebf92;      --t-t8f: #272e1b;
+    --t-t16: #8fa073;     --t-t16f: #f0fae1;
+    --t-t32: #728157;     --t-t32f: #f0fae1;
+    --t-t64: #d67f48;     --t-t64f: #402310;
+    --t-t128: #c67139;    --t-t128f: #f5ead8;
+    --t-t256: #b2622d;    --t-t256f: #fff2eb;
+    --t-t512: #56633f;    --t-t512f: #e1eecc;
+    --t-t1024: #3d472b;   --t-t1024f: #ccdbb2;
+    --t-t2048: #272e1b;   --t-t2048f: #ccdbb2;
+
+    --t-s1: #728157;  --t-s2: #c67139;  --t-s3: #8fa073;  --t-s4: #d67f48;
+    --t-s5: #56633f;  --t-s6: #aebf92;  --t-s7: #b2622d;  --t-s8: #3d472b;
+    --t-s9: #ccdbb2;  --t-s10: #a19786;
+
+    --t-p1: #ccdbb2;  --t-p2: #8fa073;  --t-p3: #56633f;  --t-p4: #ffc6a5;
+    --t-p5: #d67f48;  --t-p6: #8c491a;  --t-p7: #82796a;
+
+    --t-num1: #56633f; --t-num2: #b2622d; --t-num3: #3d472b; --t-num4: #8c491a;
+    --t-num5: #272e1b; --t-num6: #728157; --t-num7: #643312; --t-num8: #82796a;
+  }
+
+  /* ── Dusk — night mode, ember on dark bark ─────────────────────────────── */
+  html[data-skin='dusk'] {
+    --t-bg: #2e2b25;
+    --t-panel: #474238;
+    --t-card: #474238;
+    --t-ink: #f9f4ed;
+    --t-muted: #c0b6a5;
+    --t-accent: #f6a06b;
+    --t-accent-soft: #643312;
+    --t-accent-deep: #ffc6a5;
+    --t-accent-hover: #ffc6a5;
+    --t-on-accent: #402310;
+    --t-second: #aebf92;
+    --t-second-soft: #3d472b;
+    --t-line: rgba(249, 244, 237, 0.18);
+    --t-drop: #1c1a16;
+    --t-scrim: rgba(20, 18, 15, 0.66);
+    --t-hero: linear-gradient(135deg, #3d472b 0%, #2e2b25 55%, #643312 100%);
+    --t-board: #474238;
+    --t-cell: rgba(249, 244, 237, 0.08);
+    --t-ok: #aebf92;
+    --t-err: #f6a06b;
+
+    --t-t2: #645c50;      --t-t2f: #f9f4ed;
+    --t-t4: #82796a;      --t-t4f: #f9f4ed;
+    --t-t8: #d67f48;      --t-t8f: #402310;
+    --t-t16: #f6a06b;     --t-t16f: #402310;
+    --t-t32: #ffc6a5;     --t-t32f: #402310;
+    --t-t64: #aebf92;     --t-t64f: #272e1b;
+    --t-t128: #ccdbb2;    --t-t128f: #272e1b;
+    --t-t256: #8fa073;    --t-t256f: #272e1b;
+    --t-t512: #728157;    --t-t512f: #f0fae1;
+    --t-t1024: #ffe1d0;   --t-t1024f: #402310;
+    --t-t2048: #fff2eb;   --t-t2048f: #402310;
+
+    --t-s1: #f6a06b;  --t-s2: #aebf92;  --t-s3: #d67f48;  --t-s4: #8fa073;
+    --t-s5: #ffc6a5;  --t-s6: #ccdbb2;  --t-s7: #c67139;  --t-s8: #728157;
+    --t-s9: #e1eecc;  --t-s10: #82796a;
+
+    --t-p1: #ffc6a5;  --t-p2: #f6a06b;  --t-p3: #d67f48;  --t-p4: #ccdbb2;
+    --t-p5: #aebf92;  --t-p6: #8fa073;  --t-p7: #a19786;
+
+    --t-num1: #f6a06b; --t-num2: #aebf92; --t-num3: #ffc6a5; --t-num4: #ccdbb2;
+    --t-num5: #ffe1d0; --t-num6: #8fa073; --t-num7: #fff2eb; --t-num8: #c0b6a5;
+  }
+
+  /* ── Clay — kiln reds all the way down ─────────────────────────────────── */
+  html[data-skin='clay'] {
+    --t-bg: #ffe1d0;
+    --t-panel: #ffc6a5;
+    --t-card: #fff2eb;
+    --t-ink: #402310;
+    --t-muted: #8c491a;
+    --t-accent: #b2622d;
+    --t-accent-soft: #ffc6a5;
+    --t-accent-deep: #643312;
+    --t-accent-hover: #8c491a;
+    --t-on-accent: #fff2eb;
+    --t-second: #728157;
+    --t-second-soft: #e1eecc;
+    --t-line: rgba(64, 35, 16, 0.18);
+    --t-drop: #f6a06b;
+    --t-scrim: rgba(64, 35, 16, 0.55);
+    --t-hero: linear-gradient(135deg, #ffc6a5 0%, #ffe1d0 55%, #e1eecc 100%);
+    --t-board: #f6a06b;
+    --t-cell: rgba(255, 242, 235, 0.45);
+    --t-ok: #56633f;
+    --t-err: #8c491a;
+
+    --t-t2: #fff2eb;      --t-t2f: #402310;
+    --t-t4: #ffe1d0;      --t-t4f: #643312;
+    --t-t8: #f6a06b;      --t-t8f: #402310;
+    --t-t16: #d67f48;     --t-t16f: #fff2eb;
+    --t-t32: #b2622d;     --t-t32f: #fff2eb;
+    --t-t64: #8c491a;     --t-t64f: #ffe1d0;
+    --t-t128: #643312;    --t-t128f: #ffc6a5;
+    --t-t256: #402310;    --t-t256f: #ffc6a5;
+    --t-t512: #8fa073;    --t-t512f: #f0fae1;
+    --t-t1024: #728157;   --t-t1024f: #f0fae1;
+    --t-t2048: #56633f;   --t-t2048f: #e1eecc;
+
+    --t-s1: #b2622d;  --t-s2: #8fa073;  --t-s3: #8c491a;  --t-s4: #728157;
+    --t-s5: #d67f48;  --t-s6: #aebf92;  --t-s7: #643312;  --t-s8: #56633f;
+    --t-s9: #f6a06b;  --t-s10: #a19786;
+
+    --t-p1: #ffc6a5;  --t-p2: #d67f48;  --t-p3: #8c491a;  --t-p4: #ccdbb2;
+    --t-p5: #8fa073;  --t-p6: #56633f;  --t-p7: #82796a;
+
+    --t-num1: #b2622d; --t-num2: #56633f; --t-num3: #8c491a; --t-num4: #3d472b;
+    --t-num5: #643312; --t-num6: #728157; --t-num7: #402310; --t-num8: #82796a;
+  }
+
+  /* shadcn/ui primitives in src/components/ui read these; pointed at the
+     organic tokens so anything pulled in later inherits the skin. */
+  :root {
+    --background: var(--t-bg);
+    --foreground: var(--t-ink);
+    --card: var(--t-card);
+    --card-foreground: var(--t-ink);
+    --popover: var(--t-card);
+    --popover-foreground: var(--t-ink);
+    --primary: var(--t-accent);
+    --primary-foreground: var(--t-on-accent);
+    --secondary: var(--t-second);
+    --secondary-foreground: var(--t-on-accent);
+    --muted: var(--t-panel);
+    --muted-foreground: var(--t-muted);
+    --accent: var(--t-accent-soft);
+    --accent-foreground: var(--t-accent-deep);
+    --destructive: var(--t-err);
+    --destructive-foreground: var(--t-on-accent);
+    --border: var(--t-line);
+    --input: var(--t-line);
+    --ring: var(--t-accent);
   }
 
   * {
-    @apply border-border;
+    @apply border-line;
+  }
+
+  html {
+    background-color: var(--t-bg);
   }
 
   body {
-    font-family: 'DM Sans', sans-serif;
-    background-color: #F5F5F5;
-    color: #151515;
+    font-family: 'Figtree', system-ui, sans-serif;
+    background-color: var(--t-bg);
+    color: var(--t-ink);
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Caprasimo', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.12;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--t-accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--t-accent) 30%, transparent);
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Design-system component classes, re-expressed on the skin tokens.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 @layer components {
+  .font-display {
+    font-family: 'Caprasimo', Georgia, serif;
+    font-weight: 400;
+  }
+
   .font-pixel {
     font-family: 'Pixelify Sans', monospace;
   }
 
   .font-body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', system-ui, sans-serif;
   }
 
+  /* Previews and photography sit inside the palette rather than fighting it. */
+  .washed {
+    filter: saturate(0.6) contrast(0.85) brightness(1.1) opacity(0.94);
+  }
+
+  /* — buttons: pill, no ink border, chunky offset drop as the pixel echo — */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 select-none cursor-pointer;
+    font-family: 'Caprasimo', Georgia, serif;
+    font-weight: 400;
+    line-height: 1.2;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: var(--t-accent);
+    color: var(--t-on-accent);
+    box-shadow: 0 4px 0 var(--t-drop);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--t-accent-hover);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    box-shadow: 0 1px 0 var(--t-drop);
+    transform: translateY(3px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--t-ink);
+    border-color: var(--t-line);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--t-ink) 7%, transparent);
+  }
+
+  .btn-secondary:active:not(:disabled) {
+    background: color-mix(in srgb, var(--t-ink) 14%, transparent);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--t-accent);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--t-accent) 10%, transparent);
+  }
+
+  /* — surfaces — */
+  .card {
+    background: var(--t-card);
+    border: 1px solid var(--t-line);
+    border-radius: 28px;
+  }
+
+  .elev-drop {
+    box-shadow: 0 6px 0 var(--t-drop);
+  }
+
+  .elev-lg {
+    box-shadow: 0 12px 32px color-mix(in srgb, var(--t-drop) 70%, transparent);
+  }
+
+  /* — tags — */
+  .tag {
+    @apply inline-flex items-center;
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 3px 10px;
+  }
+
+  .tag-outline {
+    border: 1px solid var(--t-line);
+    color: var(--t-muted);
+  }
+
+  /* — motion — */
   .btn-bounce {
-    transition: all 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  }
-
-  .btn-bounce:active {
-    transform: translateY(4px);
+    transition: all 0.18s cubic-bezier(0.33, 1, 0.68, 1);
   }
 
   .card-bounce {
@@ -67,21 +403,25 @@
     transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
   }
 
-  .memory-card { transition: transform .22s ease, background-color .22s ease; transform-style: preserve-3d; }
-  .memory-card.is-revealed { animation: memory-flip .3s ease-out; }
-  .lights-cell { transition: background-color .16s ease, box-shadow .16s ease, transform .12s ease; }
-  .lights-cell.is-lit { box-shadow: 0 0 18px rgba(253,200,70,.85), inset 0 0 12px rgba(255,255,255,.7); animation: light-pop .2s ease-out; }
+  .memory-card {
+    transition: transform .22s ease, background-color .22s ease;
+    transform-style: preserve-3d;
+  }
+
+  .memory-card.is-revealed {
+    animation: memory-flip .3s ease-out;
+  }
+
+  .lights-cell {
+    transition: background-color .16s ease, box-shadow .16s ease, transform .12s ease;
+  }
+
+  .lights-cell.is-lit {
+    box-shadow: 0 0 18px color-mix(in srgb, var(--t-accent) 70%, transparent),
+                inset 0 0 12px color-mix(in srgb, var(--t-accent-soft) 60%, transparent);
+    animation: light-pop .2s ease-out;
+  }
 }
 
 @keyframes memory-flip { 0% { transform: rotateY(90deg) scale(.9); } 100% { transform: rotateY(0) scale(1); } }
-@keyframes light-pop { 50% { transform: scale(.9); filter: brightness(1.35); } }
-
-@layer utilities {
-  .text-shadow-pixel {
-    text-shadow: 4px 4px 0 rgba(0,0,0,0.08);
-  }
-
-  .text-shadow-pixel-sm {
-    text-shadow: 3px 3px 0 rgba(247,108,165,0.3);
-  }
-}
+@keyframes light-pop { 50% { transform: scale(.9); filter: brightness(1.2); } }

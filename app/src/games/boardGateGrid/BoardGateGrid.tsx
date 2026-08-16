@@ -15,8 +15,6 @@ import {
 import { useKeyboard } from '@/hooks/useKeyboard';
 import WinOverlay from '@/components/WinOverlay';
 
-const GATE_GRID_COLOR = '#2ED8A7';
-
 interface WireBadgeProps {
   label: string;
   inverted: boolean;
@@ -29,11 +27,12 @@ function WireBadge({ label, inverted, onToggleInvert }: WireBadgeProps) {
       <button
         onClick={onToggleInvert}
         title="Toggle invert"
-        className={`w-4 h-4 rounded-full border-[2px] border-dark transition-colors ${
-          inverted ? 'bg-dark' : 'bg-white hover:bg-gray-100'
+        aria-pressed={inverted}
+        className={`w-4 h-4 rounded-full border border-line transition-colors ${
+          inverted ? 'bg-accent' : 'bg-surface hover:bg-panel'
         }`}
       />
-      <span className="px-2 py-1 bg-white border-[2px] border-dark rounded-tile font-pixel text-sm">
+      <span className="px-2.5 py-1 bg-surface border border-line rounded-pill font-pixel text-sm text-ink">
         {label}
       </span>
     </span>
@@ -126,17 +125,18 @@ export default function BoardGateGrid() {
           <button
             key={t.name}
             onClick={() => newPuzzle(idx)}
-            className={`font-pixel text-xs px-3 py-1.5 rounded-pill border-[2px] border-dark transition-all ${
-              tierIndex === idx ? 'text-white' : 'bg-white text-dark hover:bg-gray-100'
+            className={`font-body text-[13px] px-4 py-2 rounded-pill transition-colors ${
+              tierIndex === idx
+                ? 'bg-accent text-accent-foreground font-semibold'
+                : 'border border-line text-muted-foreground hover:bg-panel'
             }`}
-            style={tierIndex === idx ? { backgroundColor: GATE_GRID_COLOR } : undefined}
           >
             {t.name}
           </button>
         ))}
       </div>
 
-      <div className="relative w-full max-w-[520px] bg-white rounded-card border-[4px] border-dark p-6 flex flex-col gap-6">
+      <div className="relative w-full max-w-[520px] card p-6 gap-6 shadow-card">
         <div className="flex flex-col gap-3">
           {tier.slots.map((slot, i) => {
             const state = assignment[i];
@@ -150,10 +150,11 @@ export default function BoardGateGrid() {
                 />
                 <button
                   onClick={() => setSelectedSlot(i)}
-                  className={`min-w-[64px] h-10 px-3 rounded-tile border-[3px] border-dark font-pixel text-sm flex items-center justify-center transition-all ${
-                    isSelected ? 'text-white' : 'bg-white text-dark hover:bg-gray-100'
+                  className={`min-w-[64px] h-10 px-3 rounded-tile font-pixel text-sm flex items-center justify-center transition-colors ${
+                    isSelected
+                      ? 'bg-accent text-accent-foreground'
+                      : 'bg-surface border border-line text-ink hover:bg-panel'
                   }`}
-                  style={isSelected ? { backgroundColor: GATE_GRID_COLOR } : undefined}
                 >
                   {state.gate ?? '?'}
                 </button>
@@ -162,8 +163,8 @@ export default function BoardGateGrid() {
                   inverted={state.wireInverts[1]}
                   onToggleInvert={() => toggleInvert(i, 1)}
                 />
-                <span className="font-pixel text-dark">=</span>
-                <span className="px-2 py-1 bg-white border-[2px] border-dark rounded-tile font-pixel text-sm">
+                <span className="font-pixel text-muted-foreground">=</span>
+                <span className="px-2.5 py-1 bg-panel rounded-pill font-pixel text-sm text-ink">
                   {slot.outputLabel}
                 </span>
               </div>
@@ -172,7 +173,7 @@ export default function BoardGateGrid() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="font-pixel text-sm text-dark">
+          <p className="font-body text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             Gates {selectedSlot === null ? '(select a slot above)' : ''}
           </p>
           <div className="flex gap-2 flex-wrap">
@@ -183,10 +184,11 @@ export default function BoardGateGrid() {
                   key={gate}
                   onClick={() => assignGate(gate)}
                   disabled={selectedSlot === null}
-                  className={`px-4 py-2 rounded-tile border-[3px] border-dark font-pixel text-sm transition-all ${
-                    isActive ? 'text-white' : 'bg-white text-dark hover:bg-gray-100'
-                  } ${selectedSlot === null ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  style={isActive ? { backgroundColor: GATE_GRID_COLOR } : undefined}
+                  className={`px-4 py-2 rounded-pill font-pixel text-sm transition-colors ${
+                    isActive
+                      ? 'bg-accent text-accent-foreground'
+                      : 'bg-surface border border-line text-ink hover:bg-panel'
+                  } ${selectedSlot === null ? 'opacity-45 cursor-not-allowed' : ''}`}
                   title={`Assign (key ${idx + 1})`}
                 >
                   {gate}
@@ -197,16 +199,16 @@ export default function BoardGateGrid() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="font-pixel text-sm border-collapse mx-auto">
+          <table className="font-pixel text-sm border-collapse mx-auto overflow-hidden rounded-tile">
             <thead>
               <tr>
                 {tier.inputLabels.map(label => (
-                  <th key={label} className="border-[2px] border-dark px-3 py-1 bg-white">
+                  <th key={label} className="border border-line px-3 py-1.5 bg-panel text-ink">
                     {label}
                   </th>
                 ))}
-                <th className="border-[2px] border-dark px-3 py-1 bg-white">Target</th>
-                <th className="border-[2px] border-dark px-3 py-1 bg-white">Your Output</th>
+                <th className="border border-line px-3 py-1.5 bg-panel text-ink">Target</th>
+                <th className="border border-line px-3 py-1.5 bg-panel text-ink">Your output</th>
               </tr>
             </thead>
             <tbody>
@@ -215,14 +217,14 @@ export default function BoardGateGrid() {
                 const yourOutput = liveOutputs[row];
                 const isFailing = failingRows.includes(row);
                 return (
-                  <tr key={row} className={isFailing ? 'bg-[#FFEBEE]' : ''}>
+                  <tr key={row} className={isFailing ? 'bg-accent-soft' : ''}>
                     {rowInputs.map((v, i) => (
-                      <td key={i} className="border-[2px] border-dark px-3 py-1 text-center">
+                      <td key={i} className="border border-line px-3 py-1.5 text-center text-muted-foreground">
                         {v ? 1 : 0}
                       </td>
                     ))}
-                    <td className="border-[2px] border-dark px-3 py-1 text-center">{target ? 1 : 0}</td>
-                    <td className="border-[2px] border-dark px-3 py-1 text-center">
+                    <td className="border border-line px-3 py-1.5 text-center text-ink">{target ? 1 : 0}</td>
+                    <td className="border border-line px-3 py-1.5 text-center text-ink">
                       {yourOutput === null ? '–' : yourOutput ? 1 : 0}
                     </td>
                   </tr>
@@ -234,8 +236,7 @@ export default function BoardGateGrid() {
 
         {solved && (
           <WinOverlay
-            title="Circuit Solved!"
-            color={GATE_GRID_COLOR}
+            title="Circuit solved"
             onKeepGoing={() => newPuzzle(tierIndex)}
             onNewGame={() => newPuzzle(0)}
           />

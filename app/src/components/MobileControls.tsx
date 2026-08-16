@@ -17,9 +17,9 @@ export default function MobileControls({
   onRight,
   onRotate,
   showRotate = false,
-  color = '#8CC298',
+  color = 'var(--t-accent)',
 }: MobileControlsProps) {
-  const btnClass = 'w-14 h-14 rounded-full border-[3px] border-dark flex items-center justify-center text-white shadow-button active:shadow-button-active active:translate-y-1 btn-bounce select-none touch-manipulation';
+  const btnClass = 'w-14 h-14 rounded-full flex items-center justify-center text-accent-foreground shadow-button active:shadow-button-active active:translate-y-[3px] btn-bounce select-none touch-manipulation';
 
   return (
     <div className="flex items-center justify-center gap-4 mt-4 md:hidden select-none">

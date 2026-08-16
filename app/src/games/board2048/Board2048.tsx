@@ -23,7 +23,7 @@ interface Board2048Props {
   onGameOver: () => void;
 }
 
-export default function Board2048({ score, onScoreChange, onGameOver }: Board2048Props) {
+export default function Board2048({ score, best, onScoreChange, onGameOver }: Board2048Props) {
   const [board, setBoard] = useState<(Tile | null)[][]>(() => {
     resetIdCounter();
     return createBoard();
@@ -112,26 +112,23 @@ export default function Board2048({ score, onScoreChange, onGameOver }: Board204
 
   return (
     <div
-      className={`relative w-full max-w-[400px] mx-auto aspect-square bg-[#D9C496] rounded-2xl border-[4px] border-dark p-3 select-none ${shake ? 'animate-shake' : ''}`}
+      className={`relative w-full max-w-[400px] mx-auto aspect-square bg-board rounded-card p-3.5 select-none ${shake ? 'animate-shake' : ''}`}
       {...swipeHandlers}
     >
       <div className="grid grid-cols-4 grid-rows-4 gap-3 w-full h-full">
         {Array.from({ length: 16 }).map((_, i) => (
-          <div
-            key={i}
-            className="rounded-lg bg-white/35"
-          />
+          <div key={i} className="rounded-tile bg-cell" />
         ))}
       </div>
 
-      <div className="absolute inset-3">
+      <div className="absolute inset-3.5">
         {tiles.map((tile) => {
           const color = getTileColor(tile.value);
           const fontSize = getTileFontSize(tile.value);
           return (
             <div
               key={tile.id}
-              className={`absolute w-[calc(25%-9px)] h-[calc(25%-9px)] rounded-lg border-[3px] border-dark flex items-center justify-center font-pixel font-bold shadow-game-tile transition-all duration-150 snap-ease ${
+              className={`absolute w-[calc(25%-9px)] h-[calc(25%-9px)] rounded-tile flex items-center justify-center font-pixel font-bold shadow-game-tile transition-all duration-150 snap-ease ${
                 tile.isNew ? 'animate-tile-spawn' : ''
               } ${tile.isMerged ? 'animate-tile-merge' : ''} ${
                 tile.value >= 128 ? 'animate-pulse' : ''
@@ -142,7 +139,6 @@ export default function Board2048({ score, onScoreChange, onGameOver }: Board204
                 backgroundColor: color.bg,
                 color: color.text,
                 fontSize,
-                textShadow: tile.value >= 8 ? '1px 1px 0 rgba(0,0,0,0.1)' : 'none',
               }}
             >
               {tile.value}
@@ -153,20 +149,16 @@ export default function Board2048({ score, onScoreChange, onGameOver }: Board204
 
       {won && !wonDisplayed && (
         <WinOverlay
-          title="You Win!"
-          color="#FCB630"
+          title="You win!"
+          score={score}
+          best={best}
           onKeepGoing={handleKeepGoing}
           onNewGame={reset}
         />
       )}
 
       {gameOver && (
-        <GameOverOverlay
-          title="Game Over!"
-          subtitle={`Score: ${score}`}
-          color="#E66A2C"
-          onTryAgain={reset}
-        />
+        <GameOverOverlay title="Out of moves" score={score} best={best} onTryAgain={reset} />
       )}
     </div>
   );

@@ -1,6 +1,13 @@
 import { useEffect, useRef } from 'react';
 
-const COLORS = ['#FCB630', '#8CC298', '#8ABAC5', '#F76CA5', '#E66A2C', '#FDC846', '#4E6E71'];
+// Read from the live skin so confetti matches whichever palette is active.
+const CONFETTI_TOKENS = ['--t-accent', '--t-second', '--t-accent-soft', '--t-accent-deep', '--t-s3', '--t-s6', '--t-s8'];
+
+function readSkinColors(): string[] {
+  const styles = getComputedStyle(document.documentElement);
+  const colors = CONFETTI_TOKENS.map((token) => styles.getPropertyValue(token).trim()).filter(Boolean);
+  return colors.length ? colors : ['#c67139'];
+}
 
 interface Particle {
   x: number;
@@ -31,13 +38,15 @@ export default function ConfettiEffect({ active }: { active: boolean }) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    const colors = readSkinColors();
+
     particlesRef.current = Array.from({ length: 80 }, () => ({
       x: Math.random() * canvas.width,
       y: -20 - Math.random() * 100,
       vx: (Math.random() - 0.5) * 6,
       vy: 2 + Math.random() * 4,
       size: 6 + Math.random() * 10,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      color: colors[Math.floor(Math.random() * colors.length)],
       rotation: Math.random() * 360,
       rotationSpeed: (Math.random() - 0.5) * 10,
       opacity: 1,

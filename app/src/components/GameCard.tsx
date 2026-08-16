@@ -13,53 +13,47 @@ export default function GameCard({ gameId, onNavigate }: GameCardProps) {
   return (
     <button
       onClick={() => onNavigate(game.route, game.color)}
-      className="group w-full max-w-[360px] h-[420px] rounded-card border-[4px] border-dark overflow-hidden shadow-card hover:shadow-card-hover hover:-translate-y-2 active:shadow-card-active active:translate-y-1 card-bounce text-left cursor-pointer"
+      className="group w-full max-w-[352px] rounded-card border border-line bg-surface shadow-card hover:shadow-card-hover hover:-translate-y-1 active:shadow-card-active active:translate-y-0.5 card-bounce overflow-hidden flex flex-col text-left cursor-pointer"
     >
       <div
-        className="h-[55%] flex items-center justify-center p-4 relative overflow-hidden"
+        className="h-[186px] flex items-center justify-center p-5 overflow-hidden"
         style={{ backgroundColor: game.bgColor }}
       >
         <img
           src={game.previewImage}
           alt={game.title}
-          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+          className="washed max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
         />
       </div>
 
-      <div className="h-[45%] bg-white p-5 flex flex-col">
-        <h3
-          className="font-pixel text-[28px] font-semibold leading-tight"
-          style={{ color: game.id === 'sudoku' ? '#FFFFFF' : game.color }}
-        >
-          <span style={{ color: game.color }}>{game.title}</span>
-        </h3>
+      <div className="p-[22px] pt-5 flex flex-col gap-2.5 flex-1">
+        <h3 className="font-display text-[26px] text-ink leading-tight">{game.title}</h3>
 
-        <p className="font-body text-sm text-[#666666] mt-1 line-clamp-2 flex-1">
+        <p className="font-body text-sm leading-[1.55] text-muted-foreground flex-1 line-clamp-3">
           {game.description}
         </p>
 
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {game.difficulties.map((diff) => (
-            <span
-              key={diff}
-              className={`text-[11px] font-body font-medium px-3 py-1 rounded-pill border-[2px] ${
-                diff === game.defaultDifficulty
-                  ? 'text-white border-dark'
-                  : 'text-[#888888] border-[#E5E5E5]'
-              }`}
-              style={
-                diff === game.defaultDifficulty
-                  ? { backgroundColor: game.color }
-                  : {}
-              }
-            >
-              {diff}
-            </span>
-          ))}
+        <div className="flex flex-wrap gap-1.5">
+          {game.difficulties.map((diff) => {
+            const isDefault = diff === game.defaultDifficulty;
+            return (
+              <span
+                key={diff}
+                className={`tag px-3 py-1.5 ${isDefault ? 'font-semibold text-ink' : 'tag-outline font-medium'}`}
+                style={
+                  isDefault
+                    ? { background: `color-mix(in srgb, ${game.color} 26%, transparent)` }
+                    : undefined
+                }
+              >
+                {diff}
+              </span>
+            );
+          })}
         </div>
 
-        <div className="mt-3 flex items-center justify-between">
-          <span className="font-pixel text-sm font-semibold text-dark bg-dark text-white px-5 py-2 rounded-pill inline-flex items-center gap-2">
+        <div className="mt-1 flex items-center justify-between">
+          <span className="btn btn-primary text-[15px] px-[22px] py-2.5">
             Play
             <ArrowRight className="w-4 h-4" />
           </span>

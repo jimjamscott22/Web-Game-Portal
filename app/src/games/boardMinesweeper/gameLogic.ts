@@ -93,7 +93,8 @@ export function checkWin(board: Cell[][], difficulty: Difficulty): boolean {
   return true;
 }
 
+// Clue colours are ramp steps of the skin rather than the seven classic
+// primaries — see `--t-num*` in src/index.css.
 export function getNumberColor(n: number): string {
-  const colors = ['', '#2196F3', '#4CAF50', '#F44336', '#9C27B0', '#FF9800', '#00BCD4', '#333333', '#999999'];
-  return colors[n] || '#333333';
+  return n >= 1 && n <= 8 ? `var(--t-num${n})` : 'var(--t-muted)';
 }

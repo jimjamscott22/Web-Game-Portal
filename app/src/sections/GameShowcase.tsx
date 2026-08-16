@@ -18,21 +18,20 @@ export default function GameShowcase({ onNavigate }: GameShowcaseProps) {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(headingRef.current, {
-        y: 30,
-        opacity: 0,
+      gsap.fromTo(headingRef.current, { y: 30, opacity: 0 }, {
+        y: 0,
+        opacity: 1,
         duration: 0.5,
         ease: 'back.out(1.7)',
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top 85%',
           once: true,
-        },
-      });
+        },});
 
-      gsap.from(subtextRef.current, {
-        y: 30,
-        opacity: 0,
+      gsap.fromTo(subtextRef.current, { y: 30, opacity: 0 }, {
+        y: 0,
+        opacity: 1,
         duration: 0.5,
         delay: 0.1,
         ease: 'back.out(1.7)',
@@ -40,14 +39,13 @@ export default function GameShowcase({ onNavigate }: GameShowcaseProps) {
           trigger: sectionRef.current,
           start: 'top 85%',
           once: true,
-        },
-      });
+        },});
 
       const cards = gridRef.current?.children;
       if (cards) {
-        gsap.from(cards, {
-          y: 60,
-          opacity: 0,
+        gsap.fromTo(cards, { y: 60, opacity: 0 }, {
+        y: 0,
+        opacity: 1,
           duration: 0.5,
           stagger: 0.12,
           ease: 'back.out(1.7)',
@@ -55,8 +53,7 @@ export default function GameShowcase({ onNavigate }: GameShowcaseProps) {
             trigger: gridRef.current,
             start: 'top 85%',
             once: true,
-          },
-        });
+          },});
       }
     }, sectionRef);
 
@@ -67,21 +64,21 @@ export default function GameShowcase({ onNavigate }: GameShowcaseProps) {
     <section
       id="games"
       ref={sectionRef}
-      className="py-24 lg:py-32 px-6 lg:px-20 bg-[#F5F5F5]"
+      className="py-24 lg:py-32 px-6 lg:px-20 bg-ground"
     >
       <div className="max-w-[1200px] mx-auto">
         <h2
           ref={headingRef}
-          className="font-pixel text-4xl lg:text-5xl font-bold text-dark text-center opacity-0"
+          className="font-display text-4xl lg:text-[44px] leading-[1.05] text-ink text-center opacity-0"
         >
-          Choose Your <span className="text-accent">Game</span>
+          Choose your <span className="text-accent">game</span>
         </h2>
 
         <p
           ref={subtextRef}
-          className="font-body text-base text-[#666666] text-center max-w-[480px] mx-auto mt-3 opacity-0"
+          className="font-body text-base text-muted-foreground text-center max-w-[460px] mx-auto mt-3 opacity-0"
         >
-          Nine pixel-perfect games, each with its own challenge. Pick one and start playing instantly.
+          Ten pixel-perfect games, each with its own challenge. Pick one and start playing instantly.
         </p>
 
         <div

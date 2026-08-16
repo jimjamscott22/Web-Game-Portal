@@ -4,6 +4,7 @@ import NavigationBar from '@/components/NavigationBar';
 import FloatingBackground from '@/components/FloatingBackground';
 import PageTransitionOverlay, { type TransitionRef } from '@/components/PageTransitionOverlay';
 import Home from '@/pages/Home';
+import { SkinProvider } from '@/theme/SkinProvider';
 
 const Game2048 = lazy(() => import('@/pages/Game2048'));
 const GameMinesweeper = lazy(() => import('@/pages/GameMinesweeper'));
@@ -28,31 +29,33 @@ export default function App() {
   const transitionRef = useRef<TransitionRef>(null);
 
   return (
-    <div className="relative min-h-screen">
-      <FloatingBackground />
-      <NavigationBar />
-      <PageTransitionOverlay ref={transitionRef} />
-      <ScrollToTop />
+    <SkinProvider>
+      <div className="relative min-h-screen">
+        <FloatingBackground />
+        <NavigationBar />
+        <PageTransitionOverlay ref={transitionRef} />
+        <ScrollToTop />
 
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="font-pixel text-2xl text-dark animate-pulse">Loading...</div>
-        </div>
-      }>
-        <Routes>
-          <Route path="/" element={<Home transitionRef={transitionRef} />} />
-          <Route path="/2048" element={<Game2048 />} />
-          <Route path="/minesweeper" element={<GameMinesweeper />} />
-          <Route path="/snake" element={<GameSnake />} />
-          <Route path="/tetris" element={<GameTetris />} />
-          <Route path="/sudoku" element={<GameSudoku />} />
-          <Route path="/binairo" element={<GameBinairo />} />
-          <Route path="/gate-grid" element={<GameGateGrid />} />
-          <Route path="/memory-match" element={<GameMemoryMatch />} />
-          <Route path="/lights-out" element={<GameLightsOut />} />
-          <Route path="/simon-says" element={<GameSimonSays />} />
-        </Routes>
-      </Suspense>
-    </div>
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="font-display text-2xl text-muted-foreground animate-pulse">Loading…</div>
+          </div>
+        }>
+          <Routes>
+            <Route path="/" element={<Home transitionRef={transitionRef} />} />
+            <Route path="/2048" element={<Game2048 />} />
+            <Route path="/minesweeper" element={<GameMinesweeper />} />
+            <Route path="/snake" element={<GameSnake />} />
+            <Route path="/tetris" element={<GameTetris />} />
+            <Route path="/sudoku" element={<GameSudoku />} />
+            <Route path="/binairo" element={<GameBinairo />} />
+            <Route path="/gate-grid" element={<GameGateGrid />} />
+            <Route path="/memory-match" element={<GameMemoryMatch />} />
+            <Route path="/lights-out" element={<GameLightsOut />} />
+            <Route path="/simon-says" element={<GameSimonSays />} />
+          </Routes>
+        </Suspense>
+      </div>
+    </SkinProvider>
   );
 }

@@ -16,12 +16,16 @@ import { useGameLoop } from '@/hooks/useGameLoop';
 import WinOverlay from '@/components/WinOverlay';
 import GameOverOverlay from '@/components/GameOverOverlay';
 import MobileControls from '@/components/MobileControls';
+import { useSkinTokens } from '@/theme/tokens';
+
+const CANVAS_TOKENS = ['--t-board', '--t-accent', '--t-second', '--t-on-accent', '--t-accent-deep', '--t-s3'] as const;
 
 interface BoardSnakeProps {
   onScoreChange: (score: number) => void;
 }
 
 export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
+  const tokens = useSkinTokens(CANVAS_TOKENS);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [snake, setSnake] = useState<Position[]>(createSnake);
   const [foods, setFoods] = useState<Food[]>(() => spawnFoods(createSnake()));
@@ -119,66 +123,57 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const roundRect = (x: number, y: number, w: number, h: number, r: number) => {
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, r);
+      ctx.fill();
+    };
+
     ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    ctx.fillStyle = '#E8F5E9';
+    // Playfield is --t-board with no gridlines.
+    ctx.fillStyle = tokens['--t-board'];
     ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-
-    for (let x = 0; x <= GRID_SIZE; x++) {
-      ctx.strokeStyle = 'rgba(0,0,0,0.03)';
-      ctx.beginPath();
-      ctx.moveTo(x * CELL, 0);
-      ctx.lineTo(x * CELL, CANVAS_SIZE);
-      ctx.stroke();
-    }
-    for (let y = 0; y <= GRID_SIZE; y++) {
-      ctx.strokeStyle = 'rgba(0,0,0,0.03)';
-      ctx.beginPath();
-      ctx.moveTo(0, y * CELL);
-      ctx.lineTo(CANVAS_SIZE, y * CELL);
-      ctx.stroke();
-    }
 
     const pulse = Math.sin(Date.now() / 200) * 0.05 + 1;
     const foodSize = CELL * 0.7 * pulse;
     foodsRef.current.forEach(f => {
-      ctx.fillStyle = f.bit === 1 ? '#E66A2C' : '#2C81E6';
+      // Two accents only: the 1-bit takes the accent, the 0-bit the secondary.
+      ctx.fillStyle = f.bit === 1 ? tokens['--t-accent'] : tokens['--t-second'];
       ctx.beginPath();
       ctx.arc(f.pos.x * CELL + CELL / 2, f.pos.y * CELL + CELL / 2, foodSize / 2, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#151515';
-      ctx.lineWidth = 2;
-      ctx.stroke();
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold ${Math.floor(CELL * 0.5)}px monospace`;
+      ctx.fillStyle = tokens['--t-on-accent'];
+      ctx.font = `bold ${Math.floor(CELL * 0.5)}px 'Pixelify Sans', monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(f.bit.toString(), f.pos.x * CELL + CELL / 2, f.pos.y * CELL + CELL / 2 + 1);
     });
 
+    const lastIndex = snake.length - 1;
     snake.forEach((seg, i) => {
       const x = seg.x * CELL;
       const y = seg.y * CELL;
       const isHead = i === 0;
+      const isTail = i === lastIndex && lastIndex > 0;
 
-      ctx.fillStyle = isHead ? '#7BB883' : '#8CC298';
-      ctx.fillRect(x + 1, y + 1, CELL - 2, CELL - 2);
-      ctx.strokeStyle = '#151515';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x + 1, y + 1, CELL - 2, CELL - 2);
+      // 16px radius on head and tail only; the body stays hard-edged.
+      ctx.fillStyle = isHead ? tokens['--t-s3'] : tokens['--t-accent-deep'];
+      const radius = isHead || isTail ? Math.min(16, CELL / 2) : 0;
+      roundRect(x + 1, y + 1, CELL - 2, CELL - 2, radius);
 
       if (!isHead) {
         const bit = ((seg.x * 31 + seg.y * 17 + i * 7) & 1).toString();
-        ctx.fillStyle = '#151515';
-        ctx.font = `bold ${Math.floor(CELL * 0.6)}px monospace`;
+        ctx.fillStyle = tokens['--t-on-accent'];
+        ctx.font = `bold ${Math.floor(CELL * 0.6)}px 'Pixelify Sans', monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(bit, x + CELL / 2, y + CELL / 2 + 1);
       }
 
       if (isHead) {
-        ctx.fillStyle = '#151515';
+        ctx.fillStyle = tokens['--t-on-accent'];
         const eyeSize = 3;
         const eyeOffset = 5;
         let ex1 = x + eyeOffset, ey1 = y + eyeOffset;
@@ -210,12 +205,12 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
 
     const animId = requestAnimationFrame(() => { });
     return () => cancelAnimationFrame(animId);
-  }, [snake, foods, direction, CANVAS_SIZE]);
+  }, [snake, foods, direction, CANVAS_SIZE, CELL, tokens]);
 
   return (
     <div className="relative">
       <div
-        className="relative rounded-xl border-[4px] border-dark overflow-hidden mx-auto"
+        className="relative rounded-card overflow-hidden mx-auto"
         style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
         {...swipeHandlers}
       >
@@ -227,29 +222,19 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
         />
 
         {gameState === 'waiting' && (
-          <div className="absolute inset-0 bg-dark/50 flex items-center justify-center">
-            <div className="text-center">
-              <p className="font-pixel text-2xl text-white mb-2">Snake</p>
-              <p className="font-body text-sm text-white/80">Press any arrow key or swipe to start</p>
+          <div className="absolute inset-0 flex items-center justify-center backdrop-blur-[2px]">
+            <div className="rounded-card border border-line bg-surface px-7 py-6 text-center shadow-card">
+              <p className="font-display text-2xl text-ink mb-1">Snake</p>
+              <p className="font-body text-sm text-muted-foreground">Press any arrow key or swipe to start</p>
             </div>
           </div>
         )}
 
         {gameState === 'won' && (
-          <WinOverlay
-            title="You Win!"
-            color="#8CC298"
-            onKeepGoing={() => setGameState('playing')}
-            onNewGame={reset}
-          />
+          <WinOverlay title="You win!" score={score} onNewGame={reset} />
         )}
         {gameState === 'lost' && (
-          <GameOverOverlay
-            title="Game Over!"
-            subtitle={`Score: ${score}`}
-            color="#E66A2C"
-            onTryAgain={reset}
-          />
+          <GameOverOverlay title="Crashed" score={score} onTryAgain={reset} />
         )}
       </div>
 
@@ -258,8 +243,10 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
           <button
             key={s}
             onClick={() => setSpeed(s)}
-            className={`font-pixel text-xs px-3 py-1.5 rounded-pill border-[2px] border-dark transition-all ${
-              speed === s ? 'bg-game-green text-white' : 'bg-white text-dark hover:bg-gray-100'
+            className={`font-body text-[13px] px-4 py-2 rounded-pill transition-colors ${
+              speed === s
+                ? 'bg-accent text-accent-foreground font-semibold'
+                : 'border border-line text-muted-foreground hover:bg-panel'
             }`}
           >
             {s}
@@ -272,7 +259,7 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
         onDown={() => changeDirection('down')}
         onLeft={() => changeDirection('left')}
         onRight={() => changeDirection('right')}
-        color="#8CC298"
+        color="var(--t-s3)"
       />
     </div>
   );

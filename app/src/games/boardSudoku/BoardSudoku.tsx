@@ -8,6 +8,8 @@ import {
 } from './gameLogic';
 import { useKeyboard } from '@/hooks/useKeyboard';
 import ConfettiEffect from '@/components/ConfettiEffect';
+import WinOverlay from '@/components/WinOverlay';
+import ScoreBox from '@/components/ScoreBox';
 import PixelButton from '@/components/PixelButton';
 
 interface BoardSudokuProps {
@@ -127,9 +129,11 @@ export default function BoardSudoku({ onTimerTick, timerSeconds }: BoardSudokuPr
       <ConfettiEffect active={solved} />
 
       <div className="relative">
+        {/* Cells sit on --t-board; 3×3 boxes are separated by 2px board gaps
+            rather than dark rules. */}
         <div
-          className="grid border-[4px] border-dark rounded-lg overflow-hidden bg-white"
-          style={{ gridTemplateColumns: 'repeat(9, 44px)' }}
+          className="grid gap-px rounded-card bg-board p-2.5"
+          style={{ gridTemplateColumns: 'repeat(9, auto)' }}
         >
           {board.map((row, r) =>
             row.map((cell, c) => {
@@ -143,24 +147,28 @@ export default function BoardSudoku({ onTimerTick, timerSeconds }: BoardSudokuPr
                 <button
                   key={`${r}-${c}`}
                   onClick={() => handleCellClick(r, c)}
-                  className={`w-[44px] h-[44px] flex items-center justify-center relative transition-colors duration-100 ${
+                  className={`w-[42px] h-[42px] rounded-sm flex items-center justify-center relative transition-colors duration-100 ${
                     isSelected
-                      ? 'bg-[#FEF1CD] border-[3px] border-[#FDC846] z-10'
-                      : isRelated
-                      ? 'bg-[#FFF8E1]'
+                      ? 'bg-accent-soft ring-2 ring-accent z-10'
                       : hasConflict
-                      ? 'bg-[#FFEBEE]'
-                      : 'hover:bg-gray-50'
+                      ? 'bg-err'
+                      : isRelated
+                      ? 'bg-panel'
+                      : 'bg-surface hover:bg-panel'
                   }`}
                   style={{
-                    borderRight: isThickRight ? '3px solid #151515' : '1px solid #CCCCCC',
-                    borderBottom: isThickBottom ? '3px solid #151515' : '1px solid #CCCCCC',
+                    marginRight: isThickRight ? 2 : undefined,
+                    marginBottom: isThickBottom ? 2 : undefined,
                   }}
                 >
                   {cell.value !== null ? (
                     <span
                       className={`font-pixel text-xl ${
-                        cell.isGiven ? 'font-bold text-dark' : 'font-normal text-[#2196F3]'
+                        hasConflict
+                          ? 'font-bold text-accent-foreground'
+                          : cell.isGiven
+                          ? 'font-bold text-ink'
+                          : 'font-normal text-accent'
                       }`}
                     >
                       {cell.value}
@@ -168,7 +176,7 @@ export default function BoardSudoku({ onTimerTick, timerSeconds }: BoardSudokuPr
                   ) : cell.notes.size > 0 ? (
                     <div className="grid grid-cols-3 gap-0 w-full h-full p-0.5">
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                        <span key={n} className="text-[8px] font-body text-[#888888] text-center leading-tight">
+                        <span key={n} className="text-[8px] font-pixel text-muted-foreground text-center leading-tight">
                           {cell.notes.has(n) ? n : ''}
                         </span>
                       ))}
@@ -181,35 +189,28 @@ export default function BoardSudoku({ onTimerTick, timerSeconds }: BoardSudokuPr
         </div>
 
         {solved && (
-          <div className="absolute inset-0 bg-dark/60 flex items-center justify-center rounded-lg z-10">
-            <div className="bg-white rounded-card border-[4px] border-dark p-6 text-center shadow-card">
-              <h3 className="font-pixel text-3xl font-bold text-game-orange mb-2">Puzzle Solved!</h3>
-              <p className="font-pixel text-lg text-dark">Time: {formatTime(timerSeconds)}</p>
-              <div className="mt-4">
-                <PixelButton variant="primary" size="sm" onClick={() => newPuzzle(difficulty)}>
-                  New Puzzle
-                </PixelButton>
-              </div>
-            </div>
-          </div>
+          <WinOverlay
+            title="Puzzle solved"
+            subtitle={`Time ${formatTime(timerSeconds)}`}
+            onNewGame={() => newPuzzle(difficulty)}
+          />
         )}
       </div>
 
       <div className="flex flex-col gap-4 min-w-[200px]">
-        <div className="bg-game-orange rounded-xl border-[3px] border-dark p-3 text-center">
-          <p className="font-body text-[10px] uppercase tracking-wider text-white/70">Time</p>
-          <p className="font-pixel text-2xl font-bold text-white">{formatTime(timerSeconds)}</p>
-        </div>
+        <ScoreBox label="Time" value={formatTime(timerSeconds)} className="w-full" />
 
         <div>
-          <p className="font-pixel text-sm text-dark mb-2">Difficulty</p>
+          <p className="font-body text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-2">Difficulty</p>
           <div className="flex gap-2">
             {(['Easy', 'Medium', 'Hard'] as DifficultyName[]).map(diff => (
               <button
                 key={diff}
                 onClick={() => newPuzzle(diff)}
-                className={`font-pixel text-xs px-3 py-1.5 rounded-pill border-[2px] border-dark transition-all ${
-                  difficulty === diff ? 'bg-game-orange text-white' : 'bg-white text-dark hover:bg-gray-100'
+                className={`font-body text-[13px] px-3.5 py-2 rounded-pill transition-colors ${
+                  difficulty === diff
+                    ? 'bg-accent text-accent-foreground font-semibold'
+                    : 'border border-line text-muted-foreground hover:bg-panel'
                 }`}
               >
                 {diff}
@@ -219,13 +220,13 @@ export default function BoardSudoku({ onTimerTick, timerSeconds }: BoardSudokuPr
         </div>
 
         <div>
-          <p className="font-pixel text-sm text-dark mb-2">Numbers</p>
+          <p className="font-body text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-2">Numbers</p>
           <div className="grid grid-cols-3 gap-2">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
               <button
                 key={num}
                 onClick={() => handleNumberInput(num)}
-                className="w-12 h-12 bg-white border-[3px] border-dark rounded-tile font-pixel text-lg text-dark flex items-center justify-center shadow-game-tile hover:bg-gray-100 active:shadow-none active:translate-y-1 btn-bounce"
+                className="w-12 h-12 bg-surface border border-line rounded-tile font-pixel text-lg text-ink flex items-center justify-center shadow-game-tile hover:bg-panel active:shadow-none active:translate-y-1 btn-bounce"
               >
                 {num}
               </button>
@@ -236,22 +237,21 @@ export default function BoardSudoku({ onTimerTick, timerSeconds }: BoardSudokuPr
         <div className="flex gap-2">
           <button
             onClick={() => handleNumberInput(null)}
-            className="flex-1 h-10 bg-white border-[3px] border-dark rounded-pill font-pixel text-sm text-dark flex items-center justify-center hover:bg-gray-100 active:translate-y-0.5"
+            className="btn btn-secondary flex-1 h-10 text-sm"
           >
             Erase
           </button>
           <button
             onClick={() => setNotesMode(!notesMode)}
-            className={`flex-1 h-10 rounded-pill font-pixel text-sm border-[3px] border-dark transition-all ${
-              notesMode ? 'bg-game-orange text-white' : 'bg-white text-dark hover:bg-gray-100'
-            }`}
+            aria-pressed={notesMode}
+            className={`btn flex-1 h-10 text-sm ${notesMode ? 'btn-primary' : 'btn-secondary'}`}
           >
-            Notes {notesMode ? 'ON' : 'OFF'}
+            Notes {notesMode ? 'on' : 'off'}
           </button>
         </div>
 
         <PixelButton variant="primary" size="sm" onClick={() => newPuzzle(difficulty)}>
-          New Puzzle
+          New puzzle
         </PixelButton>
       </div>
     </div>

@@ -12,9 +12,10 @@ import {
 } from './gameLogic';
 import { useKeyboard } from '@/hooks/useKeyboard';
 import ConfettiEffect from '@/components/ConfettiEffect';
+import WinOverlay from '@/components/WinOverlay';
+import ScoreBox from '@/components/ScoreBox';
 import PixelButton from '@/components/PixelButton';
 
-const BINAIRO_COLOR = '#7C4DFF';
 
 interface BoardBinairoProps {
   onTimerTick: () => void;
@@ -129,8 +130,10 @@ export default function BoardBinairo({ onTimerTick, timerSeconds }: BoardBinairo
 
       <div className="relative">
         <div className="flex">
+          {/* 0 and 1 are filled discs — surface and accent — so the board
+              reads as pattern. Locked clues carry a --t-drop ring. */}
           <div
-            className="grid border-[4px] border-dark rounded-lg overflow-hidden bg-white"
+            className="grid gap-px rounded-card bg-board p-2.5"
             style={{ gridTemplateColumns: `repeat(${N}, ${cellSize}px)` }}
           >
             {board.map((row, r) =>
@@ -141,42 +144,28 @@ export default function BoardBinairo({ onTimerTick, timerSeconds }: BoardBinairo
                 const hasConflict = conflicts.has(`${r},${c}`);
 
                 const bg = isSelected
-                  ? 'bg-[#E7DCFF]'
+                  ? 'bg-accent-soft ring-2 ring-accent z-10'
                   : hasConflict
-                  ? 'bg-[#FFEBEE]'
+                  ? 'bg-err'
                   : isRowRelated || isColRelated
-                  ? 'bg-[#F4EEFF]'
-                  : 'hover:bg-gray-50';
-
-                const textColor =
-                  cell.value === null
-                    ? ''
-                    : cell.isGiven
-                    ? 'text-dark'
-                    : cell.value === 1
-                    ? 'text-[#7C4DFF]'
-                    : 'text-[#F76CA5]';
+                  ? 'bg-panel'
+                  : 'bg-cell hover:bg-panel';
 
                 return (
                   <button
                     key={`${r}-${c}`}
                     onClick={() => handleCellClick(r, c)}
-                    className={`flex items-center justify-center transition-colors duration-100 ${bg}`}
-                    style={{
-                      width: cellSize,
-                      height: cellSize,
-                      borderRight: c < N - 1 ? '1px solid #CCCCCC' : 'none',
-                      borderBottom: r < N - 1 ? '1px solid #CCCCCC' : 'none',
-                    }}
+                    className={`flex items-center justify-center rounded-sm transition-colors duration-100 ${bg}`}
+                    style={{ width: cellSize, height: cellSize }}
                     aria-label={`row ${r + 1} column ${c + 1}${cell.value === null ? ' empty' : ` value ${cell.value}`}`}
                   >
                     {cell.value !== null && (
                       <span
-                        className={`font-pixel font-bold ${textColor}`}
-                        style={{ fontSize: cellSize * 0.5 }}
-                      >
-                        {cell.value}
-                      </span>
+                        className={`block rounded-full ${cell.value === 1 ? 'bg-accent' : 'bg-surface'} ${
+                          cell.isGiven ? 'ring-2 ring-drop' : ''
+                        }`}
+                        style={{ width: cellSize * 0.62, height: cellSize * 0.62 }}
+                      />
                     )}
                   </button>
                 );
@@ -186,14 +175,14 @@ export default function BoardBinairo({ onTimerTick, timerSeconds }: BoardBinairo
 
           {showDecimal && (
             <div
-              className="flex flex-col ml-2 border-[3px] border-dark rounded-lg overflow-hidden bg-white"
+              className="flex flex-col ml-2 rounded-card border border-line bg-surface overflow-hidden"
               style={{ width: 52 }}
             >
               {rowDecimals.map((dec, r) => (
                 <div
                   key={r}
-                  className={`flex items-center justify-center border-b border-[#EEEEEE] ${decimalFontSize} font-pixel ${
-                    dec === null ? 'text-[#BBBBBB]' : 'text-dark font-bold'
+                  className={`flex items-center justify-center border-b border-line ${decimalFontSize} font-pixel ${
+                    dec === null ? 'text-muted-foreground' : 'text-ink font-bold'
                   }`}
                   style={{ height: cellSize }}
                 >
@@ -206,14 +195,14 @@ export default function BoardBinairo({ onTimerTick, timerSeconds }: BoardBinairo
 
         {showDecimal && (
           <div
-            className="grid mt-2 border-[3px] border-dark rounded-lg overflow-hidden bg-white"
+            className="grid mt-2 rounded-card border border-line bg-surface overflow-hidden"
             style={{ gridTemplateColumns: `repeat(${N}, ${cellSize}px)`, width: N * cellSize }}
           >
             {colDecimals.map((dec, c) => (
               <div
                 key={c}
-                className={`flex items-center justify-center border-r border-[#EEEEEE] ${decimalFontSize} font-pixel ${
-                  dec === null ? 'text-[#BBBBBB]' : 'text-dark font-bold'
+                className={`flex items-center justify-center border-r border-line ${decimalFontSize} font-pixel ${
+                  dec === null ? 'text-muted-foreground' : 'text-ink font-bold'
                 }`}
                 style={{ height: 28 }}
               >
@@ -224,48 +213,35 @@ export default function BoardBinairo({ onTimerTick, timerSeconds }: BoardBinairo
         )}
 
         {generating && (
-          <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-lg z-10">
-            <p className="font-pixel text-lg text-dark animate-pulse">Generating...</p>
+          <div className="absolute inset-0 bg-scrim flex items-center justify-center rounded-card z-10">
+            <p className="font-display text-lg text-ink animate-pulse rounded-pill bg-surface px-5 py-2">Generating…</p>
           </div>
         )}
 
         {solved && (
-          <div className="absolute inset-0 bg-dark/60 flex items-center justify-center rounded-lg z-20">
-            <div className="bg-white rounded-card border-[4px] border-dark p-6 text-center shadow-card">
-              <h3 className="font-pixel text-3xl font-bold mb-2" style={{ color: BINAIRO_COLOR }}>
-                Puzzle Solved!
-              </h3>
-              <p className="font-pixel text-lg text-dark">Time: {formatTime(timerSeconds)}</p>
-              <div className="mt-4">
-                <PixelButton variant="primary" size="sm" onClick={() => newPuzzle(difficulty)}>
-                  New Puzzle
-                </PixelButton>
-              </div>
-            </div>
-          </div>
+          <WinOverlay
+            title="Puzzle solved"
+            subtitle={`Time ${formatTime(timerSeconds)}`}
+            onNewGame={() => newPuzzle(difficulty)}
+          />
         )}
       </div>
 
       <div className="flex flex-col gap-4 min-w-[200px]">
-        <div
-          className="rounded-xl border-[3px] border-dark p-3 text-center"
-          style={{ backgroundColor: BINAIRO_COLOR }}
-        >
-          <p className="font-body text-[10px] uppercase tracking-wider text-white/70">Time</p>
-          <p className="font-pixel text-2xl font-bold text-white">{formatTime(timerSeconds)}</p>
-        </div>
+        <ScoreBox label="Time" value={formatTime(timerSeconds)} className="w-full" />
 
         <div>
-          <p className="font-pixel text-sm text-dark mb-2">Size</p>
-          <div className="flex gap-2">
+          <p className="font-body text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-2">Size</p>
+          <div className="flex flex-wrap gap-2">
             {(['Easy', 'Medium', 'Hard'] as DifficultyName[]).map(diff => (
               <button
                 key={diff}
                 onClick={() => newPuzzle(diff)}
-                className={`font-pixel text-xs px-3 py-1.5 rounded-pill border-[2px] border-dark transition-all ${
-                  difficulty === diff ? 'text-white' : 'bg-white text-dark hover:bg-gray-100'
+                className={`font-body text-[13px] px-3.5 py-2 rounded-pill transition-colors ${
+                  difficulty === diff
+                    ? 'bg-accent text-accent-foreground font-semibold'
+                    : 'border border-line text-muted-foreground hover:bg-panel'
                 }`}
-                style={difficulty === diff ? { backgroundColor: BINAIRO_COLOR } : {}}
               >
                 {diff} {DIFFICULTY_SIZE[diff]}×{DIFFICULTY_SIZE[diff]}
               </button>
@@ -274,31 +250,31 @@ export default function BoardBinairo({ onTimerTick, timerSeconds }: BoardBinairo
         </div>
 
         <div>
-          <p className="font-pixel text-sm text-dark mb-2">Set Cell</p>
+          <p className="font-body text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-2">Set cell</p>
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => {
                 if (selectedCell) setCellValue(selectedCell[0], selectedCell[1], 0);
               }}
-              className="w-12 h-12 bg-white border-[3px] border-dark rounded-tile font-pixel text-xl flex items-center justify-center shadow-game-tile hover:bg-gray-100 active:shadow-none active:translate-y-1 btn-bounce"
-              style={{ color: '#F76CA5' }}
+              aria-label="Set selected cell to 0"
+              className="w-12 h-12 bg-surface border border-line rounded-tile flex items-center justify-center shadow-game-tile hover:bg-panel active:shadow-none active:translate-y-1 btn-bounce"
             >
-              0
+              <span className="block w-6 h-6 rounded-full bg-surface ring-1 ring-line" />
             </button>
             <button
               onClick={() => {
                 if (selectedCell) setCellValue(selectedCell[0], selectedCell[1], 1);
               }}
-              className="w-12 h-12 bg-white border-[3px] border-dark rounded-tile font-pixel text-xl flex items-center justify-center shadow-game-tile hover:bg-gray-100 active:shadow-none active:translate-y-1 btn-bounce"
-              style={{ color: BINAIRO_COLOR }}
+              aria-label="Set selected cell to 1"
+              className="w-12 h-12 bg-surface border border-line rounded-tile flex items-center justify-center shadow-game-tile hover:bg-panel active:shadow-none active:translate-y-1 btn-bounce"
             >
-              1
+              <span className="block w-6 h-6 rounded-full bg-accent" />
             </button>
             <button
               onClick={() => {
                 if (selectedCell) setCellValue(selectedCell[0], selectedCell[1], null);
               }}
-              className="w-12 h-12 bg-white border-[3px] border-dark rounded-tile font-pixel text-xs text-dark flex items-center justify-center shadow-game-tile hover:bg-gray-100 active:shadow-none active:translate-y-1 btn-bounce"
+              className="w-12 h-12 bg-surface border border-line rounded-tile font-body text-xs text-muted-foreground flex items-center justify-center shadow-game-tile hover:bg-panel active:shadow-none active:translate-y-1 btn-bounce"
             >
               Clear
             </button>
@@ -307,16 +283,14 @@ export default function BoardBinairo({ onTimerTick, timerSeconds }: BoardBinairo
 
         <button
           onClick={() => setShowDecimal(v => !v)}
-          className={`h-10 rounded-pill font-pixel text-sm border-[3px] border-dark transition-all ${
-            showDecimal ? 'text-white' : 'bg-white text-dark hover:bg-gray-100'
-          }`}
-          style={showDecimal ? { backgroundColor: BINAIRO_COLOR } : {}}
+          aria-pressed={showDecimal}
+          className={`btn h-10 text-sm ${showDecimal ? 'btn-primary' : 'btn-secondary'}`}
         >
-          Decimal {showDecimal ? 'ON' : 'OFF'}
+          Decimal {showDecimal ? 'on' : 'off'}
         </button>
 
         <PixelButton variant="primary" size="sm" onClick={() => newPuzzle(difficulty)}>
-          New Puzzle
+          New puzzle
         </PixelButton>
       </div>
     </div>
