@@ -1,0 +1,107 @@
+# .github/dependabot.yml
+# Dependabot version updates for PixelPlay (Web-Game-Portal)
+# Docs: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference
+version: 2
+
+updates:
+  # ---------------------------------------------------------------
+  # npm — the React/Vite app lives in /app, not the repo root.
+  # ---------------------------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/app"
+
+    schedule:
+      interval: "monthly"
+      time: "06:00"
+      timezone: "America/New_York"
+
+    # Batched monthly, so a low ceiling is plenty.
+    open-pull-requests-limit: 5
+
+    labels:
+      - "dependencies"
+
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+
+    # Groups are matched top-to-bottom; the first match wins.
+    # Keep the catch-all last.
+    groups:
+      # React 19 core must move in lockstep or types break.
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router*"
+          - "@types/react"
+          - "@types/react-dom"
+
+      # shadcn/ui sits on Radix primitives — ~20 packages that
+      # release constantly. One PR for all of them.
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+
+      # Tailwind 3.4 + the styling utilities shadcn generates.
+      styling:
+        patterns:
+          - "tailwindcss*"
+          - "@tailwindcss/*"
+          - "postcss*"
+          - "autoprefixer"
+          - "tailwind-merge"
+          - "class-variance-authority"
+          - "clsx"
+
+      # Build + lint toolchain: Vite 7, TS 5.9, ESLint 9.
+      build-tooling:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "typescript"
+          - "typescript-eslint"
+          - "eslint"
+          - "eslint-*"
+          - "@eslint/*"
+          - "globals"
+
+      # Everything else, minor + patch only. Stray majors still get
+      # their own PR so a breaking change never hides in a batch.
+      all-other-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Security updates ignore the monthly schedule and open right
+    # away — group them so a single advisory sweep is one PR.
+    # (Requires Dependabot security updates to be ON in repo settings.)
+    # groups entries below apply only to those:
+    #   security-batch:
+    #     applies-to: security-updates
+    #     patterns:
+    #       - "*"
+
+    # Example: pin away from a major you're not ready for.
+    # ignore:
+    #   - dependency-name: "tailwindcss"
+    #     update-types: ["version-update:semver-major"]
+
+  # ---------------------------------------------------------------
+  # GitHub Actions — uncomment once you add .github/workflows/.
+  # Action SHAs go stale fast and are a common supply-chain gap.
+  # ---------------------------------------------------------------
+  # - package-ecosystem: "github-actions"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "monthly"
+  #   labels:
+  #     - "dependencies"
+  #     - "ci"
+  #   groups:
+  #     actions:
+  #       patterns:
+  #         - "*"
