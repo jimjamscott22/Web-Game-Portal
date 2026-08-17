@@ -5,7 +5,7 @@ A colorful, retro-pixel arcade that brings ten browser games together in one res
 ## Organic Theme Preview
 
 <p align="center">
-  <img src="docs/assets/pixelplay-organic-harvest.png" alt="PixelPlay Organic theme home-page concept using the Harvest skin" width="100%">
+  <img src="docs/assets/pixelplay-organic-harvest.png" alt="PixelPlay Organic theme home-page concept using the Harvest skin" width="50%">
   <br>
   <em>Organic theme concept — Harvest skin. This handoff mockup predates Gate Grid.</em>
 </p>
@@ -59,7 +59,28 @@ npm install
 npm run dev
 ```
 
-Vite will print the local development URL, typically `http://localhost:5173`.
+Vite will print the local development URL: `http://localhost:3000`.
+
+### Quick-start scripts
+
+From the repository root, the launchers install dependencies when needed and
+then start the Vite development server:
+
+**Windows**
+
+```powershell
+.\start.bat
+```
+
+**Linux**
+
+```bash
+bash ./start.sh
+```
+
+Any additional arguments are forwarded to Vite. For example, use
+`bash ./start.sh --host 0.0.0.0` or `.\start.bat --host 0.0.0.0` to expose the
+development server on your local network.
 
 ## Available Scripts
 
