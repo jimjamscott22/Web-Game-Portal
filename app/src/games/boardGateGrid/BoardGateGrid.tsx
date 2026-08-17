@@ -136,7 +136,7 @@ export default function BoardGateGrid() {
         ))}
       </div>
 
-      <div className="relative w-full max-w-[520px] card p-6 gap-6 shadow-card">
+      <div className="relative w-full max-w-[680px] card p-6 gap-6">
         <div className="flex flex-col gap-3">
           {tier.slots.map((slot, i) => {
             const state = assignment[i];
