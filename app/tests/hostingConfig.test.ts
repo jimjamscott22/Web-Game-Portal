@@ -44,4 +44,12 @@ test('publishes complete PixelPlay page metadata', async () => {
     html,
     /name="twitter:title" content="PixelPlay \| Ten Free Browser Games"/,
   );
+  assert.match(
+    html,
+    /property="og:image" content="https:\/\/pixelplay-web-game-portal\.jimjam6579\.chatgpt\.site\/og\.png"/,
+  );
+  assert.match(
+    html,
+    /name="twitter:image" content="https:\/\/pixelplay-web-game-portal\.jimjam6579\.chatgpt\.site\/og\.png"/,
+  );
 });
