@@ -6,7 +6,7 @@
 
 **Architecture:** Keep the React application rooted in `app/`, retain its HashRouter and client-side local storage, and add the Sites Vite adapter needed to produce Cloudflare Worker-compatible ESM output. Build and validate the exact source locally, then create one Sites project, persist only its project ID, save one packaged version, and privately deploy it.
 
-**Tech Stack:** React 19.2, TypeScript 5.9, Vite 8.2, `@vitejs/plugin-react` 6.1, `@openai/sites-vite-plugin` 0.2, OpenAI Sites, Cloudflare Workers-compatible ESM
+**Tech Stack:** React 19.2, TypeScript 5.9, Vite 8.2, `@vitejs/plugin-react` 5.2, `@openai/sites-vite-plugin` 0.2, OpenAI Sites, Cloudflare Workers-compatible ESM
 
 **Spec:** `docs/superpowers/specs/2026-08-27-sites-hosting-design.md`
 
@@ -59,7 +59,7 @@ test('declares the Sites-compatible Vite toolchain', async () => {
   const viteConfig = await readFile(new URL('vite.config.ts', root), 'utf8');
 
   assert.equal(packageJson.devDependencies['@openai/sites-vite-plugin'], '^0.2.0');
-  assert.equal(packageJson.devDependencies['@vitejs/plugin-react'], '^6.1.0');
+  assert.equal(packageJson.devDependencies['@vitejs/plugin-react'], '^5.1.1');
   assert.equal(packageJson.devDependencies.vite, '^8.2.2');
   assert.match(viteConfig, /import\s+\{\s*sites\s*\}\s+from\s+['"]@openai\/sites-vite-plugin['"]/);
   assert.match(viteConfig, /plugins:\s*\[sites\(\)/);
@@ -74,7 +74,7 @@ Expected: FAIL because the Sites dependency and `sites()` configuration are not 
 
 - [ ] **Step 3: Install the current compatible hosting toolchain**
 
-Run: `cd app && npm install --save-dev @openai/sites-vite-plugin@0.2.0 vite@8.2.2 @vitejs/plugin-react@6.1.0`
+Remove the development-only `kimi-plugin-inspect-react` dependency and its `inspectAttr()` Vite entry because version 1.0.3 requires Vite 7 while Sites requires Vite 8. Then run: `cd app && npm install --save-dev @openai/sites-vite-plugin@0.2.0 vite@8.2.2`
 
 Expected: `package.json` and `package-lock.json` record the exact compatible releases without peer-dependency errors.
 
@@ -87,11 +87,10 @@ import path from 'path';
 import { sites } from '@openai/sites-vite-plugin';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import { inspectAttr } from 'kimi-plugin-inspect-react';
 
 export default defineConfig({
   base: './',
-  plugins: [sites(), inspectAttr(), react()],
+  plugins: [sites(), react()],
   server: {
     port: 3000,
   },
