@@ -46,7 +46,7 @@ export default function HeroBanner({ onStartPlaying }: HeroBannerProps) {
           ref={eyebrowRef}
           className="font-body text-xs font-semibold tracking-[0.2em] text-accent-deep uppercase mb-4 opacity-0"
         >
-          Ten classic games
+          Eleven classic games
         </div>
 
         <h1 className="font-display text-5xl sm:text-6xl lg:text-[68px] leading-[1.04] text-ink">
@@ -62,7 +62,7 @@ export default function HeroBanner({ onStartPlaying }: HeroBannerProps) {
           ref={subtitleRef}
           className="font-body text-lg text-muted-foreground max-w-[520px] mx-auto mt-6 leading-relaxed opacity-0"
         >
-          Challenge yourself with 2048, Minesweeper, Snake, Tetris, and Sudoku. All free, all fun, right in your browser.
+          Challenge yourself with 2048, Minesweeper, RoboRoute, Tetris, and Sudoku. All free, all fun, right in your browser.
         </p>
 
         <div ref={ctaRef} className="mt-8 opacity-0">

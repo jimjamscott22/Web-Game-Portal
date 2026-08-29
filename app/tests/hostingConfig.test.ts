@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../', import.meta.url);
@@ -29,27 +29,37 @@ test('declares the Sites-compatible Vite toolchain', async () => {
 test('publishes complete PixelPlay page metadata', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
 
-  assert.match(html, /<title>PixelPlay \| Ten Free Browser Games<\/title>/);
+  assert.match(html, /<title>PixelPlay \| Eleven Free Browser Games<\/title>/);
   assert.match(
     html,
-    /name="description" content="Play 2048, Minesweeper, Snake, Tetris, Sudoku, and five more free games in the PixelPlay browser arcade\."/,
+    /name="description" content="Play 2048, Minesweeper, Snake, Tetris, Sudoku, RoboRoute, and five more free games in the PixelPlay browser arcade\."/,
   );
   assert.match(
     html,
-    /property="og:title" content="PixelPlay \| Ten Free Browser Games"/,
+    /property="og:title" content="PixelPlay \| Eleven Free Browser Games"/,
   );
   assert.match(html, /property="og:description"/);
   assert.match(html, /name="twitter:card" content="summary_large_image"/);
   assert.match(
     html,
-    /name="twitter:title" content="PixelPlay \| Ten Free Browser Games"/,
+    /name="twitter:title" content="PixelPlay \| Eleven Free Browser Games"/,
   );
   assert.match(
     html,
-    /property="og:image" content="https:\/\/pixelplay-web-game-portal\.jimjam6579\.chatgpt\.site\/og\.png"/,
+    /property="og:image" content="https:\/\/pixelplay-web-game-portal\.jimjam6579\.chatgpt\.site\/og-eleven\.png"/,
   );
   assert.match(
     html,
-    /name="twitter:image" content="https:\/\/pixelplay-web-game-portal\.jimjam6579\.chatgpt\.site\/og\.png"/,
+    /name="twitter:image" content="https:\/\/pixelplay-web-game-portal\.jimjam6579\.chatgpt\.site\/og-eleven\.png"/,
   );
+});
+
+test('includes RoboRoute production art in the public package', async () => {
+  const sprite = await stat(new URL('public/assets/roboroute-sprite-sheet.png', root));
+  const preview = await stat(new URL('public/assets/card-preview-roboroute.png', root));
+  const socialPreview = await stat(new URL('public/og-eleven.png', root));
+
+  assert.ok(sprite.size > 10_000);
+  assert.ok(preview.size > 10_000);
+  assert.ok(socialPreview.size > 10_000);
 });

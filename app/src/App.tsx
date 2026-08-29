@@ -16,6 +16,7 @@ const GameGateGrid = lazy(() => import('@/pages/GameGateGrid'));
 const GameMemoryMatch = lazy(() => import('@/pages/GameMemoryMatch'));
 const GameLightsOut = lazy(() => import('@/pages/GameLightsOut'));
 const GameSimonSays = lazy(() => import('@/pages/GameSimonSays'));
+const GameRoboRoute = lazy(() => import('@/pages/GameRoboRoute'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -53,6 +54,7 @@ export default function App() {
             <Route path="/memory-match" element={<GameMemoryMatch />} />
             <Route path="/lights-out" element={<GameLightsOut />} />
             <Route path="/simon-says" element={<GameSimonSays />} />
+            <Route path="/roboroute" element={<GameRoboRoute />} />
           </Routes>
         </Suspense>
       </div>

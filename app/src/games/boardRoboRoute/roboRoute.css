@@ -1,0 +1,531 @@
+.robo-route-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.robo-tier-row,
+.robo-level-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.robo-tier-row button {
+  min-width: 104px;
+  padding: 9px 18px;
+  border: 1px solid var(--t-line);
+  border-radius: 999px;
+  color: var(--t-muted);
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.robo-tier-row button:hover,
+.robo-tier-row button.is-active {
+  background: var(--t-accent);
+  color: var(--t-on-accent);
+}
+
+.robo-tier-row button:active,
+.robo-level-row button:active,
+.robo-controls button:active,
+.robo-palette-buttons button:active {
+  transform: translateY(1px);
+}
+
+.robo-level-row button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--t-line);
+  border-radius: 50%;
+  background: var(--t-card);
+  color: var(--t-muted);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.robo-level-row button.is-active {
+  background: var(--t-second);
+  color: var(--t-on-dark);
+}
+
+.robo-workspace {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.03fr) minmax(360px, 0.97fr);
+  border: 1px solid var(--t-line);
+  border-radius: 22px;
+  background: var(--t-card);
+  box-shadow: 0 18px 48px color-mix(in srgb, var(--t-drop) 65%, transparent);
+  overflow: hidden;
+}
+
+.robo-board-panel,
+.robo-program-panel {
+  padding: 22px;
+  min-width: 0;
+}
+
+.robo-board-panel {
+  border-right: 1px solid var(--t-line);
+  background: color-mix(in srgb, var(--t-card) 82%, var(--t-panel));
+}
+
+.robo-objective-row,
+.robo-program-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  color: var(--t-muted);
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.robo-level-title,
+.robo-panel-label {
+  color: var(--t-ink);
+  font-family: Caprasimo, Georgia, serif;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.robo-objective-row p:last-child,
+.robo-program-header p {
+  margin-top: 4px;
+}
+
+.robo-level-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  white-space: nowrap;
+  font-family: "Pixelify Sans", monospace;
+  font-size: 10px;
+}
+
+.robo-stars {
+  display: flex;
+  gap: 3px;
+  color: var(--t-muted);
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.robo-stars span {
+  opacity: 0.28;
+}
+
+.robo-stars span.is-filled {
+  color: var(--t-accent);
+  opacity: 1;
+}
+
+.robo-grid {
+  display: grid;
+  gap: 5px;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding: 10px;
+  border: 1px solid var(--t-line);
+  border-radius: 18px;
+  background: var(--t-board);
+  box-shadow: inset 0 2px 8px color-mix(in srgb, var(--t-drop) 60%, transparent);
+}
+
+.robo-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--t-line) 78%, transparent);
+  border-radius: 11px;
+  background: var(--t-cell);
+  overflow: visible;
+}
+
+.robo-sprite {
+  position: absolute;
+  inset: 3px;
+  display: block;
+  background-image: url('/assets/roboroute-sprite-sheet.png');
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  filter: drop-shadow(0 3px 3px color-mix(in srgb, var(--t-drop) 70%, transparent));
+}
+
+.robo-sprite-robot {
+  z-index: 4;
+  background-position: left top;
+}
+
+.robo-direction-arrow {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 5;
+  width: 20px;
+  height: 20px;
+  padding: 3px;
+  border: 1px solid var(--t-line);
+  border-radius: 50%;
+  background: var(--t-card);
+  color: var(--t-accent-deep);
+  filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--t-drop) 70%, transparent));
+  transition: transform 240ms ease;
+}
+
+.robo-direction-arrow.faces-east { transform: rotate(90deg); }
+.robo-direction-arrow.faces-south { transform: rotate(180deg); }
+.robo-direction-arrow.faces-west { transform: rotate(270deg); }
+.robo-sprite-wall { z-index: 2; background-position: right top; }
+.robo-sprite-battery { z-index: 2; background-position: left bottom; animation: robo-bob 1.5s ease-in-out infinite; }
+.robo-sprite-beacon { z-index: 1; background-position: right bottom; animation: robo-pulse 1.8s ease-in-out infinite; }
+
+.robo-status-strip {
+  min-height: 36px;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--t-panel);
+  color: var(--t-muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 12px;
+}
+
+.robo-status-message {
+  margin-left: auto;
+  text-align: right;
+}
+
+.robo-program-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 590px;
+}
+
+.robo-block-count {
+  flex: none;
+  color: var(--t-muted);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 10px;
+}
+
+.robo-program-scroll {
+  flex: 1;
+  min-height: 250px;
+  max-height: 390px;
+  padding: 10px;
+  overflow-y: auto;
+  border: 1px solid var(--t-line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--t-panel) 45%, transparent);
+}
+
+.robo-lane {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 42px;
+  padding: 7px;
+  border: 1px dashed transparent;
+  border-radius: 11px;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.robo-lane.is-selected {
+  border-color: var(--t-accent);
+  background: color-mix(in srgb, var(--t-accent-soft) 58%, transparent);
+}
+
+.robo-insert-lane {
+  align-self: stretch;
+  min-height: 30px;
+  border: 1px dashed var(--t-line);
+  border-radius: 8px;
+  color: var(--t-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.robo-insert-lane[aria-pressed='true'] {
+  border-color: var(--t-accent);
+  color: var(--t-accent-deep);
+}
+
+.robo-command {
+  padding: 7px;
+  border: 1px solid var(--t-line);
+  border-radius: 11px;
+  background: var(--t-card);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--t-drop) 70%, transparent);
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.robo-command.is-loop { background: var(--t-accent-soft); }
+.robo-command.is-while { background: var(--t-second-soft); }
+.robo-command.is-logic { background: color-mix(in srgb, var(--t-second-soft) 70%, var(--t-card)); }
+
+.robo-command.is-running {
+  box-shadow: 0 0 0 3px var(--t-accent), 0 4px 12px color-mix(in srgb, var(--t-drop) 80%, transparent);
+  transform: translateX(2px);
+}
+
+.robo-command-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--t-ink);
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.robo-command-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--t-card) 72%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t-accent-deep);
+}
+
+.robo-remove-command {
+  width: 26px;
+  height: 26px;
+  margin-left: auto;
+  border-radius: 7px;
+  color: var(--t-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.robo-remove-command:hover { background: var(--t-card); color: var(--t-err); }
+.robo-command > .robo-lane,
+.robo-branches { margin-top: 7px; }
+
+.robo-branches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.robo-branch-label {
+  display: block;
+  margin: 0 0 3px 8px;
+  color: var(--t-muted);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.robo-palette {
+  margin-top: 14px;
+}
+
+.robo-palette > .robo-panel-label {
+  display: block;
+  margin-bottom: 7px;
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.robo-palette-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.robo-palette-buttons button,
+.robo-controls button {
+  border: 1px solid var(--t-line);
+  border-radius: 9px;
+  background: var(--t-card);
+  color: var(--t-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.robo-palette-buttons button {
+  padding: 7px 9px;
+}
+
+.robo-palette-buttons button:hover:not(:disabled) {
+  background: var(--t-panel);
+}
+
+.robo-controls {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.robo-controls button {
+  min-height: 40px;
+  padding: 8px;
+}
+
+.robo-controls button.is-primary {
+  background: var(--t-second);
+  color: var(--t-on-dark);
+}
+
+.robo-palette-buttons button:disabled,
+.robo-controls button:disabled,
+.robo-remove-command:disabled,
+.robo-insert-lane:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.robo-feedback {
+  margin-top: 10px;
+  padding: 9px 10px;
+  border-left: 3px solid var(--t-err);
+  border-radius: 8px;
+  background: var(--t-accent-soft);
+  color: var(--t-ink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 12px;
+}
+
+.robo-feedback.is-success {
+  border-left-color: var(--t-ok);
+  background: var(--t-second-soft);
+}
+
+.robo-feedback button {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--t-accent-deep);
+  font-weight: 800;
+}
+
+@keyframes robo-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes robo-pulse {
+  0%, 100% { filter: drop-shadow(0 2px 3px color-mix(in srgb, var(--t-drop) 70%, transparent)); }
+  50% { filter: drop-shadow(0 0 8px var(--t-accent)); }
+}
+
+@media (max-width: 900px) {
+  .robo-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .robo-board-panel {
+    border-right: 0;
+    border-bottom: 1px solid var(--t-line);
+  }
+
+  .robo-program-panel {
+    min-height: auto;
+  }
+
+  .robo-program-scroll {
+    max-height: 440px;
+  }
+}
+
+@media (max-width: 560px) {
+  .robo-board-panel,
+  .robo-program-panel {
+    padding: 14px;
+  }
+
+  .robo-objective-row,
+  .robo-program-header {
+    flex-direction: column;
+  }
+
+  .robo-level-meta {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .robo-grid {
+    gap: 3px;
+    padding: 7px;
+  }
+
+  .robo-cell {
+    border-radius: 8px;
+  }
+
+  .robo-status-strip {
+    flex-wrap: wrap;
+  }
+
+  .robo-status-message {
+    width: 100%;
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .robo-branches {
+    grid-template-columns: 1fr;
+  }
+
+  .robo-controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .robo-sprite-battery,
+  .robo-sprite-beacon {
+    animation: none;
+  }
+
+  .robo-sprite-robot,
+  .robo-command,
+  .robo-tier-row button,
+  .robo-level-row button,
+  .robo-controls button,
+  .robo-palette-buttons button {
+    transition: none;
+  }
+}

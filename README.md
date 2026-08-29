@@ -27,7 +27,7 @@ A colorful, retro-pixel arcade that brings ten browser games together in one res
 
 ## Highlights
 
-- Ten games spanning arcade, number, logic, and memory challenges
+- Eleven games spanning arcade, number, logic, coding, and memory challenges
 - Responsive layouts with keyboard and pointer or touch input
 - Multiple difficulty or board-size options on supported games
 - Locally saved best scores, rounds, moves, or times where available
