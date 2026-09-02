@@ -114,6 +114,7 @@ export const GAMES: GameConfig[] = [
   { id: 'memory-match', title: 'Memory Match', description: 'Flip pixel cards, remember their symbols, and match every pair.', color: 'var(--t-s7)', bgColor: 'var(--t-s7)', route: '/memory-match', previewImage: '/assets/card-preview-memory-match.svg', difficulties: ['Easy','Medium','Hard'], defaultDifficulty: 'Easy' },
   { id: 'lights-out', title: 'Lights Out', description: 'Toggle each light and its neighbors until the whole grid goes dark.', color: 'var(--t-s8)', bgColor: 'var(--t-s8)', route: '/lights-out', previewImage: '/assets/card-preview-lights-out.svg', difficulties: ['Easy','Medium','Hard'], defaultDifficulty: 'Easy' },
   { id: 'simon-says', title: 'Simon Says', description: 'Watch the colorful sequence grow, then repeat every flash from memory.', color: 'var(--t-s9)', bgColor: 'var(--t-s9)', route: '/simon-says', previewImage: '/assets/card-preview-simon-says.svg', difficulties: ['Easy','Medium','Hard'], defaultDifficulty: 'Easy' },
+  { id: 'nonogram', title: 'Nonogram', description: 'Use the numeric clues to fill in the grid and reveal a hidden pixel-art picture.', color: 'var(--t-s12)', bgColor: 'var(--t-s12)', route: '/nonogram', previewImage: '/assets/card-preview-nonogram.svg', difficulties: ['5x5', '10x10', '15x15'], defaultDifficulty: '5x5' },
 ];
 
 export const NAV_GAMES: NavGame[] = GAMES.map(g => ({
