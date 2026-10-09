@@ -1,8 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   createBoard,
   placeMines,
   revealCell,
+  revealMines,
+  countFlags,
   checkWin,
   getNumberColor,
   DIFFICULTIES,
@@ -10,24 +12,51 @@ import {
 } from './gameLogic';
 import WinOverlay from '@/components/WinOverlay';
 import GameOverOverlay from '@/components/GameOverOverlay';
+import ScoreBox from '@/components/ScoreBox';
+
+/** Per-step stagger for the flood-fill ripple and the mine detonations. */
+const CASCADE_STEP_MS = 14;
+const DETONATE_STEP_MS = 45;
+
+const cloneBoard = (board: Cell[][]) => board.map(r => r.map(c => ({ ...c })));
 
 export default function BoardMinesweeper() {
   const [difficultyIndex, setDifficultyIndex] = useState(0);
   const difficulty = DIFFICULTIES[difficultyIndex];
   const [board, setBoard] = useState<Cell[][]>(() => createBoard(difficulty));
   const [gameState, setGameState] = useState<'playing' | 'won' | 'lost'>('playing');
-  const [, setMinesLeft] = useState(difficulty.mines);
+  const [showLoss, setShowLoss] = useState(false);
+  const [shake, setShake] = useState(false);
   const [firstClick, setFirstClick] = useState(true);
   const [flagMode, setFlagMode] = useState(false);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const timers = useRef<number[]>([]);
+
+  const minesLeft = difficulty.mines - countFlags(board);
+
+  const clearTimers = () => { timers.current.forEach(id => window.clearTimeout(id)); timers.current = []; };
+  useEffect(() => clearTimers, []);
+
+  // Clock runs from the first reveal until the game ends.
+  useEffect(() => {
+    if (startedAt === null || gameState !== 'playing') return;
+    const id = window.setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 250);
+    return () => window.clearInterval(id);
+  }, [startedAt, gameState]);
 
   const reset = useCallback((diffIdx?: number) => {
     const idx = diffIdx !== undefined ? diffIdx : difficultyIndex;
     const diff = DIFFICULTIES[idx];
+    clearTimers();
     setBoard(createBoard(diff));
     setGameState('playing');
-    setMinesLeft(diff.mines);
+    setShowLoss(false);
+    setShake(false);
     setFirstClick(true);
     setFlagMode(false);
+    setStartedAt(null);
+    setElapsed(0);
   }, [difficultyIndex]);
 
   const handleDifficultyChange = useCallback((idx: number) => {
@@ -35,76 +64,60 @@ export default function BoardMinesweeper() {
     reset(idx);
   }, [reset]);
 
+  const cycleMark = useCallback((row: number, col: number) => {
+    const newBoard = cloneBoard(board);
+    const cell = newBoard[row][col];
+    if (cell.state === 'hidden') cell.state = 'flagged';
+    else if (cell.state === 'flagged') cell.state = 'question';
+    else if (cell.state === 'question') cell.state = 'hidden';
+    else return;
+    setBoard(newBoard);
+  }, [board]);
+
   const handleCellClick = useCallback((row: number, col: number) => {
     if (gameState !== 'playing') return;
 
-    setBoard(prev => {
-      const newBoard = prev.map(r => r.map(c => ({ ...c })));
-      const cell = newBoard[row][col];
-
-      if (firstClick) {
-        placeMines(newBoard, difficulty, row, col);
-        setFirstClick(false);
-        revealCell(newBoard, row, col, difficulty);
-        setBoard(newBoard);
-        return newBoard;
-      }
-
-      if (flagMode) {
-        if (cell.state === 'hidden') {
-          cell.state = 'flagged';
-          setMinesLeft(m => m - 1);
-        } else if (cell.state === 'flagged') {
-          cell.state = 'question';
-          setMinesLeft(m => m + 1);
-        } else if (cell.state === 'question') {
-          cell.state = 'hidden';
-        }
-        return newBoard;
-      }
-
-      if (cell.state === 'flagged' || cell.state === 'question') return prev;
-
-      if (cell.isMine) {
-        cell.state = 'revealed';
-        for (let r = 0; r < difficulty.rows; r++) {
-          for (let c = 0; c < difficulty.cols; c++) {
-            if (newBoard[r][c].isMine) newBoard[r][c].state = 'revealed';
-          }
-        }
-        setGameState('lost');
-        return newBoard;
-      }
-
+    if (firstClick) {
+      const newBoard = cloneBoard(board);
+      placeMines(newBoard, difficulty, row, col);
       revealCell(newBoard, row, col, difficulty);
+      setFirstClick(false);
+      setStartedAt(Date.now());
+      setBoard(newBoard);
+      if (checkWin(newBoard, difficulty)) setGameState('won');
+      return;
+    }
 
-      if (checkWin(newBoard, difficulty)) {
-        setGameState('won');
-      }
+    if (flagMode) return cycleMark(row, col);
 
-      return newBoard;
-    });
-  }, [gameState, firstClick, flagMode, difficulty]);
+    const cell = board[row][col];
+    if (cell.state !== 'hidden') return;
+
+    const newBoard = cloneBoard(board);
+
+    if (cell.isMine) {
+      const maxDelay = revealMines(newBoard, row, col);
+      setBoard(newBoard);
+      setGameState('lost');
+      setShake(true);
+      timers.current.push(
+        window.setTimeout(() => setShake(false), 400),
+        // Let the detonation ripple finish before the overlay covers it.
+        window.setTimeout(() => setShowLoss(true), maxDelay * DETONATE_STEP_MS + 450),
+      );
+      return;
+    }
+
+    revealCell(newBoard, row, col, difficulty);
+    setBoard(newBoard);
+    if (checkWin(newBoard, difficulty)) setGameState('won');
+  }, [board, gameState, firstClick, flagMode, difficulty, cycleMark]);
 
   const handleRightClick = useCallback((e: React.MouseEvent, row: number, col: number) => {
     e.preventDefault();
     if (gameState !== 'playing') return;
-
-    setBoard(prev => {
-      const newBoard = prev.map(r => r.map(c => ({ ...c })));
-      const cell = newBoard[row][col];
-      if (cell.state === 'hidden') {
-        cell.state = 'flagged';
-        setMinesLeft(m => m - 1);
-      } else if (cell.state === 'flagged') {
-        cell.state = 'question';
-        setMinesLeft(m => m + 1);
-      } else if (cell.state === 'question') {
-        cell.state = 'hidden';
-      }
-      return newBoard;
-    });
-  }, [gameState]);
+    cycleMark(row, col);
+  }, [gameState, cycleMark]);
 
   const cellSize = difficulty.cols > 16 ? 28 : difficulty.cols > 9 ? 34 : 42;
 
@@ -137,8 +150,13 @@ export default function BoardMinesweeper() {
         </button>
       </div>
 
+      <div className="flex gap-3 mb-4">
+        <ScoreBox label="Mines" value={minesLeft} />
+        <ScoreBox label="Time" value={elapsed} tone="surface" />
+      </div>
+
       <div
-        className="inline-grid gap-[2px] rounded-card bg-board p-3 overflow-hidden select-none"
+        className={`inline-grid gap-[2px] rounded-card bg-board p-3 overflow-hidden select-none ${shake ? 'animate-shake' : ''}`}
         style={{
           gridTemplateColumns: `repeat(${difficulty.cols}, ${cellSize}px)`,
         }}
@@ -155,7 +173,9 @@ export default function BoardMinesweeper() {
                 key={`${r}-${c}`}
                 onClick={() => handleCellClick(r, c)}
                 onContextMenu={(e) => handleRightClick(e, r, c)}
-                className={`flex items-center justify-center rounded-sm font-pixel font-bold transition-all duration-100 ${
+                className={`flex items-center justify-center rounded-sm font-pixel font-bold transition-colors duration-100 ${
+                  isRevealed ? (isMine ? 'ms-detonate' : 'ms-reveal') : ''
+                } ${
                   isRevealed
                     ? isMine
                       ? 'bg-err'
@@ -170,6 +190,9 @@ export default function BoardMinesweeper() {
                   fontSize: isRevealed && !isMine && cell.adjacentMines > 0 ? 16 : 14,
                   color: isRevealed && !isMine ? getNumberColor(cell.adjacentMines) : undefined,
                   cursor: isRevealed ? 'default' : 'pointer',
+                  animationDelay: isRevealed
+                    ? `${(cell.revealDelay ?? 0) * (isMine ? DETONATE_STEP_MS : CASCADE_STEP_MS)}ms`
+                    : undefined,
                 }}
               >
                 {/* Mines and flags are accent discs, not glyphs. */}
@@ -190,7 +213,7 @@ export default function BoardMinesweeper() {
       {gameState === 'won' && (
         <WinOverlay title="Field cleared" onNewGame={() => reset()} />
       )}
-      {gameState === 'lost' && (
+      {gameState === 'lost' && showLoss && (
         <GameOverOverlay title="Boom" subtitle="You hit a mine." onTryAgain={() => reset()} />
       )}
     </div>

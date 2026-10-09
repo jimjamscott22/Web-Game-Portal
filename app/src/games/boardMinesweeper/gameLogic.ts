@@ -4,6 +4,8 @@ export interface Cell {
   isMine: boolean;
   state: CellState;
   adjacentMines: number;
+  /** Stagger step for the reveal animation (BFS / ring distance). */
+  revealDelay?: number;
 }
 
 export interface Difficulty {
@@ -64,22 +66,59 @@ export function placeMines(board: Cell[][], difficulty: Difficulty, excludeRow: 
   }
 }
 
-export function revealCell(board: Cell[][], row: number, col: number, difficulty: Difficulty): void {
+/**
+ * Flood-reveal from (row, col) breadth-first. Each newly revealed cell gets
+ * `revealDelay` = its BFS distance from the click, so the board can stagger
+ * the cascade outward. Returns the number of cells revealed.
+ */
+export function revealCell(board: Cell[][], row: number, col: number, difficulty: Difficulty): number {
   const { rows, cols } = difficulty;
-  if (row < 0 || row >= rows || col < 0 || col >= cols) return;
-  const cell = board[row][col];
-  if (cell.state !== 'hidden') return;
+  if (row < 0 || row >= rows || col < 0 || col >= cols) return 0;
+  if (board[row][col].state !== 'hidden') return 0;
 
-  cell.state = 'revealed';
+  const queue: [number, number, number][] = [[row, col, 0]];
+  board[row][col].state = 'revealed';
+  board[row][col].revealDelay = 0;
+  let revealed = 1;
 
-  if (cell.adjacentMines === 0 && !cell.isMine) {
+  for (let head = 0; head < queue.length; head++) {
+    const [r, c, dist] = queue[head];
+    const cell = board[r][c];
+    if (cell.isMine || cell.adjacentMines !== 0) continue;
     for (let dr = -1; dr <= 1; dr++) {
       for (let dc = -1; dc <= 1; dc++) {
-        if (dr === 0 && dc === 0) continue;
-        revealCell(board, row + dr, col + dc, difficulty);
+        const nr = r + dr, nc = c + dc;
+        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+        const next = board[nr][nc];
+        if (next.state !== 'hidden') continue;
+        next.state = 'revealed';
+        next.revealDelay = dist + 1;
+        revealed++;
+        queue.push([nr, nc, dist + 1]);
       }
     }
   }
+  return revealed;
+}
+
+/**
+ * Reveal every mine after a loss. `revealDelay` is the Chebyshev distance
+ * from the mine that was hit, so detonations ripple out from it. Returns the
+ * largest delay assigned.
+ */
+export function revealMines(board: Cell[][], row: number, col: number): number {
+  let maxDelay = 0;
+  board.forEach((line, r) => line.forEach((cell, c) => {
+    if (!cell.isMine) return;
+    cell.state = 'revealed';
+    cell.revealDelay = Math.max(Math.abs(r - row), Math.abs(c - col));
+    maxDelay = Math.max(maxDelay, cell.revealDelay);
+  }));
+  return maxDelay;
+}
+
+export function countFlags(board: Cell[][]): number {
+  return board.reduce((n, line) => n + line.filter(cell => cell.state === 'flagged').length, 0);
 }
 
 export function checkWin(board: Cell[][], difficulty: Difficulty): boolean {

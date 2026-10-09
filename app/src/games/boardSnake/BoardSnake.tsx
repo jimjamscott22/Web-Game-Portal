@@ -4,6 +4,7 @@ import {
   spawnFoods,
   moveSnake,
   getOpposite,
+  interpolateSnake,
   GRID_SIZE,
   SPEEDS,
   type Direction,
@@ -16,6 +17,7 @@ import { useGameLoop } from '@/hooks/useGameLoop';
 import WinOverlay from '@/components/WinOverlay';
 import GameOverOverlay from '@/components/GameOverOverlay';
 import MobileControls from '@/components/MobileControls';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { useSkinTokens } from '@/theme/tokens';
 
 const CANVAS_TOKENS = ['--t-board', '--t-accent', '--t-second', '--t-on-accent', '--t-accent-deep', '--t-s3'] as const;
@@ -40,6 +42,14 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
   const foodsRef = useRef(foods);
   const gameStateRef = useRef(gameState);
   const scoreRef = useRef(score);
+  // Draw-loop state: the snake one tick ago and when the latest tick landed,
+  // so segments can glide between cells instead of jumping.
+  const prevSnakeRef = useRef(snake);
+  const lastTickRef = useRef(0);
+  const tickMsRef = useRef(SPEEDS[speed]);
+  const tokensRef = useRef(tokens);
+  const reducedMotion = usePrefersReducedMotion();
+  const reducedMotionRef = useRef(reducedMotion);
 
   useEffect(() => { directionRef.current = direction; }, [direction]);
   useEffect(() => { nextDirRef.current = nextDirection; }, [nextDirection]);
@@ -47,12 +57,16 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
   useEffect(() => { foodsRef.current = foods; }, [foods]);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { scoreRef.current = score; }, [score]);
+  useEffect(() => { tickMsRef.current = SPEEDS[speed]; }, [speed]);
+  useEffect(() => { tokensRef.current = tokens; }, [tokens]);
+  useEffect(() => { reducedMotionRef.current = reducedMotion; }, [reducedMotion]);
 
   const CELL = 24;
   const CANVAS_SIZE = GRID_SIZE * CELL;
 
   const reset = useCallback(() => {
     const s = createSnake();
+    prevSnakeRef.current = s;
     setSnake(s);
     setFoods(spawnFoods(s));
     setDirection('right');
@@ -100,10 +114,14 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
 
     setSnake(prev => {
       const { newSnake, ateBit, died } = moveSnake(prev, nextDirRef.current, foodsRef.current);
+      lastTickRef.current = performance.now();
       if (died) {
+        prevSnakeRef.current = prev;
         setGameState('lost');
         return prev;
       }
+      prevSnakeRef.current = prev;
+      snakeRef.current = newSnake;
       if (ateBit !== null) {
         setFoods(spawnFoods(newSnake));
         setScore(s => {
@@ -117,6 +135,8 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
     });
   }, gameState === 'playing', 1000 / SPEEDS[speed]);
 
+  // Continuous rAF draw loop, decoupled from the game tick: the food pulses
+  // smoothly and the snake is interpolated between grid cells.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -129,83 +149,100 @@ export default function BoardSnake({ onScoreChange }: BoardSnakeProps) {
       ctx.fill();
     };
 
-    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    let animId = 0;
+    const draw = (now: number) => {
+      const tk = tokensRef.current;
+      const still = reducedMotionRef.current;
+      const cells = snakeRef.current;
+      const t = still || gameStateRef.current !== 'playing'
+        ? 1
+        : Math.min(1, (now - lastTickRef.current) / tickMsRef.current);
+      const drawn = interpolateSnake(prevSnakeRef.current, cells, t);
 
-    // Playfield is --t-board with no gridlines.
-    ctx.fillStyle = tokens['--t-board'];
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    const pulse = Math.sin(Date.now() / 200) * 0.05 + 1;
-    const foodSize = CELL * 0.7 * pulse;
-    foodsRef.current.forEach(f => {
-      // Two accents only: the 1-bit takes the accent, the 0-bit the secondary.
-      ctx.fillStyle = f.bit === 1 ? tokens['--t-accent'] : tokens['--t-second'];
-      ctx.beginPath();
-      ctx.arc(f.pos.x * CELL + CELL / 2, f.pos.y * CELL + CELL / 2, foodSize / 2, 0, Math.PI * 2);
-      ctx.fill();
+      // Playfield is --t-board with no gridlines.
+      ctx.fillStyle = tk['--t-board'];
+      ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-      ctx.fillStyle = tokens['--t-on-accent'];
-      ctx.font = `bold ${Math.floor(CELL * 0.5)}px 'Pixelify Sans', monospace`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(f.bit.toString(), f.pos.x * CELL + CELL / 2, f.pos.y * CELL + CELL / 2 + 1);
-    });
+      const pulse = still ? 1 : Math.sin(now / 200) * 0.05 + 1;
+      const foodSize = CELL * 0.7 * pulse;
+      foodsRef.current.forEach(f => {
+        // Two accents only: the 1-bit takes the accent, the 0-bit the secondary.
+        ctx.fillStyle = f.bit === 1 ? tk['--t-accent'] : tk['--t-second'];
+        ctx.beginPath();
+        ctx.arc(f.pos.x * CELL + CELL / 2, f.pos.y * CELL + CELL / 2, foodSize / 2, 0, Math.PI * 2);
+        ctx.fill();
 
-    const lastIndex = snake.length - 1;
-    snake.forEach((seg, i) => {
-      const x = seg.x * CELL;
-      const y = seg.y * CELL;
-      const isHead = i === 0;
-      const isTail = i === lastIndex && lastIndex > 0;
-
-      // 16px radius on head and tail only; the body stays hard-edged.
-      ctx.fillStyle = isHead ? tokens['--t-s3'] : tokens['--t-accent-deep'];
-      const radius = isHead || isTail ? Math.min(16, CELL / 2) : 0;
-      roundRect(x + 1, y + 1, CELL - 2, CELL - 2, radius);
-
-      if (!isHead) {
-        const bit = ((seg.x * 31 + seg.y * 17 + i * 7) & 1).toString();
-        ctx.fillStyle = tokens['--t-on-accent'];
-        ctx.font = `bold ${Math.floor(CELL * 0.6)}px 'Pixelify Sans', monospace`;
+        ctx.fillStyle = tk['--t-on-accent'];
+        ctx.font = `bold ${Math.floor(CELL * 0.5)}px 'Pixelify Sans', monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(bit, x + CELL / 2, y + CELL / 2 + 1);
-      }
+        ctx.fillText(f.bit.toString(), f.pos.x * CELL + CELL / 2, f.pos.y * CELL + CELL / 2 + 1);
+      });
 
-      if (isHead) {
-        ctx.fillStyle = tokens['--t-on-accent'];
-        const eyeSize = 3;
-        const eyeOffset = 5;
-        let ex1 = x + eyeOffset, ey1 = y + eyeOffset;
-        let ex2 = x + CELL - eyeOffset - eyeSize, ey2 = y + eyeOffset;
+      const lastIndex = drawn.length - 1;
+      // Paint tail-first so the head sits on top where segments overlap mid-glide.
+      for (let i = lastIndex; i >= 0; i--) {
+        const seg = drawn[i];
+        const x = seg.x * CELL;
+        const y = seg.y * CELL;
+        const isHead = i === 0;
+        const isTail = i === lastIndex && lastIndex > 0;
 
-        switch (directionRef.current) {
-          case 'up':
-            ex1 = x + eyeOffset; ey1 = y + eyeOffset;
-            ex2 = x + CELL - eyeOffset - eyeSize; ey2 = y + eyeOffset;
-            break;
-          case 'down':
-            ex1 = x + eyeOffset; ey1 = y + CELL - eyeOffset - eyeSize;
-            ex2 = x + CELL - eyeOffset - eyeSize; ey2 = y + CELL - eyeOffset - eyeSize;
-            break;
-          case 'left':
-            ex1 = x + eyeOffset; ey1 = y + eyeOffset;
-            ex2 = x + eyeOffset; ey2 = y + CELL - eyeOffset - eyeSize;
-            break;
-          case 'right':
-            ex1 = x + CELL - eyeOffset - eyeSize; ey1 = y + eyeOffset;
-            ex2 = x + CELL - eyeOffset - eyeSize; ey2 = y + CELL - eyeOffset - eyeSize;
-            break;
+        // 16px radius on head and tail only; the body stays hard-edged.
+        ctx.fillStyle = isHead ? tk['--t-s3'] : tk['--t-accent-deep'];
+        const radius = isHead || isTail ? Math.min(16, CELL / 2) : 0;
+        roundRect(x + 1, y + 1, CELL - 2, CELL - 2, radius);
+
+        if (!isHead) {
+          // Bits key off the destination cell so they don't flicker mid-glide.
+          const cell = cells[i];
+          const bit = ((cell.x * 31 + cell.y * 17 + i * 7) & 1).toString();
+          ctx.fillStyle = tk['--t-on-accent'];
+          ctx.font = `bold ${Math.floor(CELL * 0.6)}px 'Pixelify Sans', monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(bit, x + CELL / 2, y + CELL / 2 + 1);
         }
 
-        ctx.fillRect(ex1, ey1, eyeSize, eyeSize);
-        ctx.fillRect(ex2, ey2, eyeSize, eyeSize);
-      }
-    });
+        if (isHead) {
+          ctx.fillStyle = tk['--t-on-accent'];
+          const eyeSize = 3;
+          const eyeOffset = 5;
+          let ex1 = x + eyeOffset, ey1 = y + eyeOffset;
+          let ex2 = x + CELL - eyeOffset - eyeSize, ey2 = y + eyeOffset;
 
-    const animId = requestAnimationFrame(() => { });
+          switch (directionRef.current) {
+            case 'up':
+              ex1 = x + eyeOffset; ey1 = y + eyeOffset;
+              ex2 = x + CELL - eyeOffset - eyeSize; ey2 = y + eyeOffset;
+              break;
+            case 'down':
+              ex1 = x + eyeOffset; ey1 = y + CELL - eyeOffset - eyeSize;
+              ex2 = x + CELL - eyeOffset - eyeSize; ey2 = y + CELL - eyeOffset - eyeSize;
+              break;
+            case 'left':
+              ex1 = x + eyeOffset; ey1 = y + eyeOffset;
+              ex2 = x + eyeOffset; ey2 = y + CELL - eyeOffset - eyeSize;
+              break;
+            case 'right':
+              ex1 = x + CELL - eyeOffset - eyeSize; ey1 = y + eyeOffset;
+              ex2 = x + CELL - eyeOffset - eyeSize; ey2 = y + CELL - eyeOffset - eyeSize;
+              break;
+          }
+
+          ctx.fillRect(ex1, ey1, eyeSize, eyeSize);
+          ctx.fillRect(ex2, ey2, eyeSize, eyeSize);
+        }
+      }
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    animId = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animId);
-  }, [snake, foods, direction, CANVAS_SIZE, CELL, tokens]);
+  }, [CANVAS_SIZE, CELL]);
 
   return (
     <div className="relative">

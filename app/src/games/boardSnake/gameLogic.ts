@@ -95,3 +95,15 @@ export function getOpposite(direction: Direction): Direction {
     case 'right': return 'left';
   }
 }
+
+/**
+ * Segment positions `t` (0..1) of the way from one tick to the next. Each
+ * segment slides from its previous cell to its current one; a segment that
+ * did not exist last tick (the tail after eating) holds still.
+ */
+export function interpolateSnake(prev: Position[], current: Position[], t: number): Position[] {
+  return current.map((seg, i) => {
+    const from = prev[i] ?? seg;
+    return { x: from.x + (seg.x - from.x) * t, y: from.y + (seg.y - from.y) * t };
+  });
+}

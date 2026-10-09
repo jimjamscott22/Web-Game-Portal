@@ -3,6 +3,7 @@ import {
   randomPiece,
   rotatePiece,
   isValidPosition,
+  ghostPiece,
   lockPiece,
   clearLines,
   getDropSpeed,
@@ -52,6 +53,7 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
   const levelRef = useRef(level);
   const linesRef = useRef(lines);
   const dropAccumulator = useRef(0);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { pieceRef.current = piece; }, [piece]);
   useEffect(() => { boardRef.current = board; }, [board]);
@@ -84,7 +86,17 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
     setPiece(p);
   }, [nextPiece]);
 
+  const cancelScheduledLock = useCallback(() => {
+    if (lockTimerRef.current !== null) {
+      clearTimeout(lockTimerRef.current);
+      lockTimerRef.current = null;
+    }
+  }, []);
+
   const lockAndClear = useCallback(() => {
+    cancelScheduledLock();
+    if (gameStateRef.current !== 'playing') return;
+
     let newBoard = lockPiece(boardRef.current, pieceRef.current);
     const { newBoard: cleared, linesCleared } = clearLines(newBoard);
 
@@ -108,7 +120,15 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
 
     setBoard(newBoard);
     spawnPiece();
-  }, [spawnPiece, onScoreChange, onLinesChange, onLevelChange]);
+  }, [cancelScheduledLock, spawnPiece, onScoreChange, onLinesChange, onLevelChange]);
+
+  const scheduleLock = useCallback(() => {
+    if (lockTimerRef.current !== null) return;
+    lockTimerRef.current = setTimeout(() => {
+      lockTimerRef.current = null;
+      lockAndClear();
+    }, 0);
+  }, [lockAndClear]);
 
   const move = useCallback((dx: number, dy: number) => {
     if (gameStateRef.current !== 'playing') return;
@@ -117,11 +137,11 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
         return { ...p, x: p.x + dx, y: p.y + dy };
       }
       if (dy > 0 && !isValidPosition(boardRef.current, p, 0, 1)) {
-        setTimeout(() => lockAndClear(), 0);
+        scheduleLock();
       }
       return p;
     });
-  }, [lockAndClear]);
+  }, [scheduleLock]);
 
   const rotate = useCallback(() => {
     if (gameStateRef.current !== 'playing') return;
@@ -136,13 +156,24 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
     });
   }, []);
 
+  const hardDrop = useCallback(() => {
+    if (gameStateRef.current !== 'playing') return;
+    cancelScheduledLock();
+    const landed = ghostPiece(boardRef.current, pieceRef.current);
+    pieceRef.current = landed;
+    setPiece(landed);
+    dropAccumulator.current = 0;
+    lockAndClear();
+  }, [cancelScheduledLock, lockAndClear]);
+
   useKeyboard({
     arrowleft: () => move(-1, 0),
     arrowright: () => move(1, 0),
     arrowdown: () => move(0, 1),
     arrowup: rotate,
-    ' ': rotate,
-  }, [move, rotate]);
+    x: rotate,
+    ' ': hardDrop,
+  }, [move, rotate, hardDrop], { noRepeat: [' '] });
 
   useGameLoop((delta) => {
     if (gameStateRef.current !== 'playing') return;
@@ -188,15 +219,26 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
       }
     }
 
-    const p = pieceRef.current;
-    for (let r = 0; r < p.shape.length; r++) {
-      for (let c = 0; c < p.shape[r].length; c++) {
-        if (p.shape[r][c]) {
-          drawBlock(ctx, p.x + c, p.y + r, p.color);
+    // Ghost piece: where the active piece would land, at low alpha.
+    const ghost = ghostPiece(board, piece);
+    if (ghost.y !== piece.y) {
+      ctx.globalAlpha = 0.25;
+      for (let r = 0; r < ghost.shape.length; r++) {
+        for (let c = 0; c < ghost.shape[r].length; c++) {
+          if (ghost.shape[r][c]) drawBlock(ctx, ghost.x + c, ghost.y + r, ghost.color);
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    for (let r = 0; r < piece.shape.length; r++) {
+      for (let c = 0; c < piece.shape[r].length; c++) {
+        if (piece.shape[r][c]) {
+          drawBlock(ctx, piece.x + c, piece.y + r, piece.color);
         }
       }
     }
-  });
+  }, [board, piece, flashLines, tokens, drawBlock, CANVAS_W, CANVAS_H]);
 
   useEffect(() => {
     const canvas = nextCanvasRef.current;
@@ -248,6 +290,7 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
               onLevelChange(1);
               onLinesChange(0);
               dropAccumulator.current = 0;
+              cancelScheduledLock();
             }}
           />
         )}
@@ -266,13 +309,15 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
         <div className="font-body text-xs text-muted-foreground space-y-1">
           <p>Left/Right: move</p>
           <p>Down: soft drop</p>
-          <p>Up/Space: rotate</p>
+          <p>Up/X: rotate</p>
+          <p>Space: hard drop</p>
         </div>
 
         <MobileControls
           onLeft={() => move(-1, 0)}
           onRight={() => move(1, 0)}
           onDown={() => move(0, 1)}
+          onUp={hardDrop}
           onRotate={rotate}
           showRotate
           color="var(--t-s4)"
