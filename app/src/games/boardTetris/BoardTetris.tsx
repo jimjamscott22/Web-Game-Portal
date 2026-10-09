@@ -53,6 +53,7 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
   const levelRef = useRef(level);
   const linesRef = useRef(lines);
   const dropAccumulator = useRef(0);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { pieceRef.current = piece; }, [piece]);
   useEffect(() => { boardRef.current = board; }, [board]);
@@ -85,7 +86,17 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
     setPiece(p);
   }, [nextPiece]);
 
+  const cancelScheduledLock = useCallback(() => {
+    if (lockTimerRef.current !== null) {
+      clearTimeout(lockTimerRef.current);
+      lockTimerRef.current = null;
+    }
+  }, []);
+
   const lockAndClear = useCallback(() => {
+    cancelScheduledLock();
+    if (gameStateRef.current !== 'playing') return;
+
     let newBoard = lockPiece(boardRef.current, pieceRef.current);
     const { newBoard: cleared, linesCleared } = clearLines(newBoard);
 
@@ -109,7 +120,15 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
 
     setBoard(newBoard);
     spawnPiece();
-  }, [spawnPiece, onScoreChange, onLinesChange, onLevelChange]);
+  }, [cancelScheduledLock, spawnPiece, onScoreChange, onLinesChange, onLevelChange]);
+
+  const scheduleLock = useCallback(() => {
+    if (lockTimerRef.current !== null) return;
+    lockTimerRef.current = setTimeout(() => {
+      lockTimerRef.current = null;
+      lockAndClear();
+    }, 0);
+  }, [lockAndClear]);
 
   const move = useCallback((dx: number, dy: number) => {
     if (gameStateRef.current !== 'playing') return;
@@ -118,11 +137,11 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
         return { ...p, x: p.x + dx, y: p.y + dy };
       }
       if (dy > 0 && !isValidPosition(boardRef.current, p, 0, 1)) {
-        setTimeout(() => lockAndClear(), 0);
+        scheduleLock();
       }
       return p;
     });
-  }, [lockAndClear]);
+  }, [scheduleLock]);
 
   const rotate = useCallback(() => {
     if (gameStateRef.current !== 'playing') return;
@@ -139,11 +158,13 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
 
   const hardDrop = useCallback(() => {
     if (gameStateRef.current !== 'playing') return;
+    cancelScheduledLock();
     const landed = ghostPiece(boardRef.current, pieceRef.current);
     pieceRef.current = landed;
+    setPiece(landed);
     dropAccumulator.current = 0;
     lockAndClear();
-  }, [lockAndClear]);
+  }, [cancelScheduledLock, lockAndClear]);
 
   useKeyboard({
     arrowleft: () => move(-1, 0),
@@ -152,7 +173,7 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
     arrowup: rotate,
     x: rotate,
     ' ': hardDrop,
-  }, [move, rotate, hardDrop]);
+  }, [move, rotate, hardDrop], { noRepeat: [' '] });
 
   useGameLoop((delta) => {
     if (gameStateRef.current !== 'playing') return;
@@ -269,6 +290,7 @@ export default function BoardTetris({ onScoreChange, onLevelChange, onLinesChang
               onLevelChange(1);
               onLinesChange(0);
               dropAccumulator.current = 0;
+              cancelScheduledLock();
             }}
           />
         )}
