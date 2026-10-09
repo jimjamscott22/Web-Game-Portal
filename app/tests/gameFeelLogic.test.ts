@@ -11,7 +11,6 @@ import {
   revealMines,
   countFlags,
   createBoard,
-  type Cell,
   DIFFICULTIES,
 } from '../src/games/boardMinesweeper/gameLogic.ts';
 import { interpolateSnake } from '../src/games/boardSnake/gameLogic.ts';

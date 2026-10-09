@@ -17,8 +17,9 @@ export function useKeyboard(
 ) {
   const keyMapRef = useRef(keyMap);
   keyMapRef.current = keyMap;
-  const noRepeatRef = useRef(options?.noRepeat ?? []);
-  noRepeatRef.current = options?.noRepeat ?? [];
+  const noRepeat = options?.noRepeat;
+  const noRepeatRef = useRef(noRepeat ?? []);
+  useEffect(() => { noRepeatRef.current = noRepeat ?? []; }, [noRepeat]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
