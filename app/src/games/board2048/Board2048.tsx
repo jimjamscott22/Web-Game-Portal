@@ -23,6 +23,16 @@ interface Board2048Props {
   onGameOver: () => void;
 }
 
+interface ScorePopup {
+  id: string;
+  value: number;
+  row: number;
+  col: number;
+}
+
+const maxTile = (board: (Tile | null)[][]) =>
+  board.reduce((max, row) => row.reduce((m, t) => Math.max(m, t?.value ?? 0), max), 0);
+
 export default function Board2048({ score, best, onScoreChange, onGameOver }: Board2048Props) {
   const [board, setBoard] = useState<(Tile | null)[][]>(() => {
     resetIdCounter();
@@ -33,6 +43,10 @@ export default function Board2048({ score, best, onScoreChange, onGameOver }: Bo
   const [gameOver, setGameOver] = useState(false);
   const [keepGoing, setKeepGoing] = useState(false);
   const [shake, setShake] = useState(false);
+  // One-shot glow for a tile that set a new board high, and "+N" popups at
+  // each merge site.
+  const [burstId, setBurstId] = useState<string | null>(null);
+  const [popups, setPopups] = useState<ScorePopup[]>([]);
 
   const reset = useCallback(() => {
     resetIdCounter();
@@ -42,6 +56,8 @@ export default function Board2048({ score, best, onScoreChange, onGameOver }: Bo
     setGameOver(false);
     setKeepGoing(false);
     setShake(false);
+    setBurstId(null);
+    setPopups([]);
     onScoreChange(-score);
   }, [score, onScoreChange]);
 
@@ -50,6 +66,14 @@ export default function Board2048({ score, best, onScoreChange, onGameOver }: Bo
 
     const { newBoard, scoreDelta, moved } = move(board, direction);
     if (!moved) return;
+
+    const merged = newBoard.flat().filter((t): t is Tile => Boolean(t?.isMerged));
+    const prevMax = maxTile(board);
+    const record = merged.reduce<Tile | null>((best, t) => (t.value > prevMax && t.value > (best?.value ?? 0) ? t : best), null);
+    if (record) setBurstId(record.id);
+    if (merged.length) {
+      setPopups(prev => [...prev, ...merged.map(t => ({ id: t.id, value: t.value, row: t.row, col: t.col }))]);
+    }
 
     addRandomTile(newBoard);
     setBoard(newBoard);
@@ -130,8 +154,8 @@ export default function Board2048({ score, best, onScoreChange, onGameOver }: Bo
               key={tile.id}
               className={`absolute w-[calc(25%-9px)] h-[calc(25%-9px)] rounded-tile flex items-center justify-center font-pixel font-bold shadow-game-tile transition-all duration-150 snap-ease ${
                 tile.isNew ? 'animate-tile-spawn' : ''
-              } ${tile.isMerged ? 'animate-tile-merge' : ''} ${
-                tile.value >= 128 ? 'animate-pulse' : ''
+              } ${
+                tile.id === burstId ? 'tile-glow-burst' : tile.isMerged ? 'animate-tile-merge' : ''
               }`}
               style={{
                 left: `calc(${tile.col * 25}% + ${tile.col * 3}px)`,
@@ -145,6 +169,21 @@ export default function Board2048({ score, best, onScoreChange, onGameOver }: Bo
             </div>
           );
         })}
+
+        {popups.map(p => (
+          <span
+            key={p.id}
+            aria-hidden="true"
+            onAnimationEnd={() => setPopups(prev => prev.filter(q => q.id !== p.id))}
+            className="score-float pointer-events-none absolute z-10 font-pixel font-bold text-lg text-accent-deep"
+            style={{
+              left: `calc(${p.col * 25}% + ${p.col * 3}px + (25% - 9px) / 2)`,
+              top: `calc(${p.row * 25}% + ${p.row * 3}px)`,
+            }}
+          >
+            +{p.value}
+          </span>
+        ))}
       </div>
 
       {won && !wonDisplayed && (

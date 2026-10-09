@@ -59,6 +59,18 @@ export function isValidPosition(board: (string | null)[][], piece: Piece, offset
   return true;
 }
 
+/** Rows the piece can fall before it collides — 0 when it is already resting. */
+export function dropDistance(board: (string | null)[][], piece: Piece): number {
+  let distance = 0;
+  while (isValidPosition(board, piece, 0, distance + 1)) distance++;
+  return distance;
+}
+
+/** Where the piece lands if hard-dropped from its current position. */
+export function ghostPiece(board: (string | null)[][], piece: Piece): Piece {
+  return { ...piece, y: piece.y + dropDistance(board, piece) };
+}
+
 export function lockPiece(board: (string | null)[][], piece: Piece): (string | null)[][] {
   const newBoard = board.map(row => [...row]);
   for (let r = 0; r < piece.shape.length; r++) {
