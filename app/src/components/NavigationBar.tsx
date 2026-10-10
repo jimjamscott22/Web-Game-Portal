@@ -26,7 +26,7 @@ export default function NavigationBar() {
           scrolled ? 'shadow-soft' : ''
         }`}
       >
-        <div className="max-w-[1400px] mx-auto h-full flex items-center justify-between gap-6 px-6 lg:px-10">
+        <div className="max-w-[1520px] mx-auto h-full flex items-center justify-between gap-6 px-6 lg:px-10">
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
             <span className="w-[30px] h-[30px] rounded-full bg-accent flex items-center justify-center font-pixel text-[15px] text-accent-foreground">
               P
@@ -34,12 +34,12 @@ export default function NavigationBar() {
             <span className="font-display text-[22px] text-ink tracking-[-0.01em]">Pixelplay</span>
           </Link>
 
-          <div className="hidden xl:flex items-center gap-5">
+          <div className="hidden 2xl:flex items-center gap-4">
             {NAV_GAMES.map((game) => (
               <Link
                 key={game.id}
                 to={game.route}
-                className="font-body text-sm font-medium text-muted-foreground hover:text-accent transition-colors duration-200"
+                className="font-body text-sm font-medium whitespace-nowrap text-muted-foreground hover:text-accent transition-colors duration-200"
               >
                 {game.title}
               </Link>
@@ -56,7 +56,7 @@ export default function NavigationBar() {
             </Link>
 
             <button
-              className="xl:hidden flex flex-col gap-1.5 p-2"
+              className="2xl:hidden flex flex-col gap-1.5 p-2"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
             >

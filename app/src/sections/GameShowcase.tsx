@@ -78,7 +78,7 @@ export default function GameShowcase({ onNavigate }: GameShowcaseProps) {
           ref={subtextRef}
           className="font-body text-base text-muted-foreground text-center max-w-[460px] mx-auto mt-3 opacity-0"
         >
-          Eleven pixel-perfect games, each with its own challenge. Pick one and start playing instantly.
+          Fourteen pixel-perfect games, each with its own challenge. Pick one and start playing instantly.
         </p>
 
         <div

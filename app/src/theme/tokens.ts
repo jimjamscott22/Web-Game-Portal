@@ -90,3 +90,26 @@ export function useSkinTokens<const Names extends readonly string[]>(
     return readTokens(names);
   }, [names, skinVersion]);
 }
+
+function relativeLuminance(hex: string): number | null {
+  const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const digits = m[1].length === 3 ? [...m[1]].map((d) => d + d).join('') : m[1];
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const c = parseInt(digits.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * Which half of the fixed `--t-on-light` / `--t-on-dark` pair reads best on a
+ * resolved token colour, for surfaces whose fill is picked at runtime (e.g. a
+ * per-symbol palette). Pass a value from `useSkinTokens`.
+ */
+export function inkOn(color: string): '--t-on-light' | '--t-on-dark' {
+  const lum = relativeLuminance(color);
+  if (lum === null) return '--t-on-light';
+  // Contrast against #201e1d (L≈0.013) vs #f9f4ed (L≈0.90).
+  return (lum + 0.05) / 0.063 >= 0.95 / (lum + 0.05) ? '--t-on-light' : '--t-on-dark';
+}
