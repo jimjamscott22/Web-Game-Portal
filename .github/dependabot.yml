@@ -55,7 +55,7 @@ updates:
           - "class-variance-authority"
           - "clsx"
 
-      # Build + lint toolchain: Vite 7, TS 5.9, ESLint 9.
+      # Build + lint toolchain: Vite 8, TS 6.0, ESLint 10.
       build-tooling:
         patterns:
           - "vite"
@@ -85,10 +85,13 @@ updates:
     #     patterns:
     #       - "*"
 
-    # Example: pin away from a major you're not ready for.
-    # ignore:
-    #   - dependency-name: "tailwindcss"
-    #     update-types: ["version-update:semver-major"]
+    # Pin away from versions the toolchain isn't ready for.
+    ignore:
+      # typescript-eslint's peer range is typescript <6.1.0; TS 7 also
+      # drops `baseUrl` and broke install/build/lint. Lift this once
+      # typescript-eslint supports newer TypeScript.
+      - dependency-name: "typescript"
+        versions: [">=6.1.0"]
 
   # ---------------------------------------------------------------
   # GitHub Actions — uncomment once you add .github/workflows/.

@@ -115,6 +115,28 @@ export const GAMES: GameConfig[] = [
   { id: 'lights-out', title: 'Lights Out', description: 'Toggle each light and its neighbors until the whole grid goes dark.', color: 'var(--t-s8)', bgColor: 'var(--t-s8)', route: '/lights-out', previewImage: '/assets/card-preview-lights-out.svg', difficulties: ['Easy','Medium','Hard'], defaultDifficulty: 'Easy' },
   { id: 'simon-says', title: 'Simon Says', description: 'Watch the colorful sequence grow, then repeat every flash from memory.', color: 'var(--t-s9)', bgColor: 'var(--t-s9)', route: '/simon-says', previewImage: '/assets/card-preview-simon-says.svg', difficulties: ['Easy','Medium','Hard'], defaultDifficulty: 'Easy' },
   { id: 'nonogram', title: 'Nonogram', description: 'Use the numeric clues to fill in the grid and reveal a hidden pixel-art picture.', color: 'var(--t-s12)', bgColor: 'var(--t-s12)', route: '/nonogram', previewImage: '/assets/card-preview-nonogram.svg', difficulties: ['5x5', '10x10', '15x15'], defaultDifficulty: '5x5' },
+  {
+    id: 'breakout',
+    title: 'Breakout',
+    description: 'Bounce the ball off your paddle to smash a wall of pixel bricks. Angle your shots and clear five levels before you run out of balls.',
+    color: 'var(--t-s13)',
+    bgColor: 'var(--t-s13)',
+    route: '/breakout',
+    previewImage: '/assets/card-preview-breakout.svg',
+    difficulties: ['Easy', 'Normal', 'Hard'],
+    defaultDifficulty: 'Normal',
+  },
+  {
+    id: 'code-breaker',
+    title: 'Code Breaker',
+    description: 'Deduce the hidden digit code from exact and near clues. Every guess narrows the field — crack it before you get locked out.',
+    color: 'var(--t-s14)',
+    bgColor: 'var(--t-s14)',
+    route: '/code-breaker',
+    previewImage: '/assets/card-preview-code-breaker.svg',
+    difficulties: ['Easy', 'Medium', 'Hard'],
+    defaultDifficulty: 'Easy',
+  },
 ];
 
 export const NAV_GAMES: NavGame[] = GAMES.map(g => ({

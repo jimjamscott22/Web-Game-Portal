@@ -46,7 +46,7 @@ export default function HeroBanner({ onStartPlaying }: HeroBannerProps) {
           ref={eyebrowRef}
           className="font-body text-xs font-semibold tracking-[0.2em] text-accent-deep uppercase mb-4 opacity-0"
         >
-          Eleven classic games
+          Fourteen classic games
         </div>
 
         <h1 className="font-display text-5xl sm:text-6xl lg:text-[68px] leading-[1.04] text-ink">

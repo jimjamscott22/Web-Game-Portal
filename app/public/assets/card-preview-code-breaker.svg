@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220">
+  <rect width="400" height="220" fill="#20242D"/>
+  <g stroke="#151515" stroke-width="3">
+    <rect width="34" height="34" x="120" y="16" rx="8" fill="#2E3440"/>
+    <rect width="34" height="34" x="162" y="16" rx="8" fill="#2E3440"/>
+    <rect width="34" height="34" x="204" y="16" rx="8" fill="#2E3440"/>
+    <rect width="34" height="34" x="246" y="16" rx="8" fill="#2E3440"/>
+  </g>
+  <g fill="#A8B4C3" font-family="monospace" font-size="20" font-weight="bold" text-anchor="middle"><text x="137" y="40">?</text><text x="179" y="40">?</text><text x="221" y="40">?</text><text x="263" y="40">?</text></g>
+  <rect width="200" height="2" x="100" y="60" fill="#4E5969"/>
+  <g stroke="#151515" stroke-width="3">
+    <rect width="34" height="34" x="120" y="72" rx="8" fill="#FDC846"/>
+    <rect width="34" height="34" x="162" y="72" rx="8" fill="#D67F48"/>
+    <rect width="34" height="34" x="204" y="72" rx="8" fill="#A8B4C3"/>
+    <rect width="34" height="34" x="246" y="72" rx="8" fill="#C67139"/>
+  </g>
+  <g fill="#151515" font-family="monospace" font-size="20" font-weight="bold" text-anchor="middle"><text x="137" y="96">3</text><text x="179" y="96">1</text><text x="221" y="96">5</text><text x="263" y="96">6</text></g>
+  <rect width="10" height="10" x="300" y="78" rx="2" fill="#FDC846"/>
+  <rect width="8" height="8" x="315" y="79" rx="2" fill="none" stroke="#FDC846" stroke-width="2"/>
+  <rect width="10" height="10" x="300" y="92" rx="2" fill="#4E5969"/>
+  <rect width="10" height="10" x="314" y="92" rx="2" fill="#4E5969"/>
+  <g stroke="#151515" stroke-width="3">
+    <rect width="34" height="34" x="120" y="118" rx="8" fill="#FDC846"/>
+    <rect width="34" height="34" x="162" y="118" rx="8" fill="#4E5969"/>
+    <rect width="34" height="34" x="204" y="118" rx="8" fill="#D67F48"/>
+    <rect width="34" height="34" x="246" y="118" rx="8" fill="#8FA073"/>
+  </g>
+  <g fill="#151515" font-family="monospace" font-size="20" font-weight="bold" text-anchor="middle"><text x="137" y="142">3</text><text x="179" y="142">4</text><text x="221" y="142">1</text><text x="263" y="142">2</text></g>
+  <rect width="10" height="10" x="300" y="124" rx="2" fill="#FDC846"/>
+  <rect width="10" height="10" x="314" y="124" rx="2" fill="#FDC846"/>
+  <rect width="8" height="8" x="301" y="139" rx="2" fill="none" stroke="#FDC846" stroke-width="2"/>
+  <rect width="8" height="8" x="315" y="139" rx="2" fill="none" stroke="#FDC846" stroke-width="2"/>
+  <g stroke="#151515" stroke-width="3">
+    <rect width="34" height="34" x="120" y="164" rx="8" fill="#FDC846"/>
+    <rect width="34" height="34" x="162" y="164" rx="8" fill="#4E5969"/>
+    <rect width="34" height="34" x="204" y="164" rx="8" fill="#8FA073"/>
+    <rect width="34" height="34" x="246" y="164" rx="8" fill="#D67F48"/>
+  </g>
+  <g fill="#151515" font-family="monospace" font-size="20" font-weight="bold" text-anchor="middle"><text x="137" y="188">3</text><text x="179" y="188">4</text><text x="221" y="188">2</text><text x="263" y="188">1</text></g>
+  <rect width="10" height="10" x="300" y="170" rx="2" fill="#FDC846"/>
+  <rect width="10" height="10" x="314" y="170" rx="2" fill="#FDC846"/>
+  <rect width="10" height="10" x="300" y="184" rx="2" fill="#FDC846"/>
+  <rect width="10" height="10" x="314" y="184" rx="2" fill="#FDC846"/>
+</svg>
