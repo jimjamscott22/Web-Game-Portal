@@ -15,9 +15,10 @@ npm run dev       # Vite dev server on http://localhost:3000 (not Vite's default
 npm run build     # tsc -b && vite build — type-check is part of the build, do not skip
 npm run lint      # ESLint 9 flat config (eslint.config.js)
 npm run preview   # serve the dist/ build
+npm run test      # node:test via tsx — runs app/tests/**/*.test.ts
 ```
 
-There is no test runner configured. Do not invent `npm test`; verify changes with `npm run build` (type-check) + `npm run lint` + manual browser check.
+Tests use Node's built-in `node:test` + `node:assert/strict` (run through `tsx`), not Jest/Vitest. They live in `app/tests/` and import pure `gameLogic.ts` modules directly — keep game rules testable by keeping them out of React. Verify changes with `npm run test` + `npm run build` (type-check) + `npm run lint` + manual browser check.
 
 ## Architecture
 
