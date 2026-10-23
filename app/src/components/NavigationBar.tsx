@@ -5,19 +5,22 @@ import SkinPicker from './SkinPicker';
 
 export default function NavigationBar() {
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const [mobileMenu, setMobileMenu] = useState({ pathname: location.pathname, open: false });
+  const mobileOpen = mobileMenu.open;
+  const setMobileOpen = (open: boolean) => setMobileMenu({ pathname: location.pathname, open });
   const isHome = location.pathname === '/';
+
+  // Reset route-specific UI before rendering a new route, including browser Back.
+  if (mobileMenu.pathname !== location.pathname) {
+    setMobileMenu({ pathname: location.pathname, open: false });
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 100);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
 
   return (
     <>

@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useState } from 'react';
 
 // Organic ground: soft drifting discs, no hard-edged squares or plus signs.
 const TOKENS = ['--t-accent', '--t-second', '--t-accent-soft', '--t-second-soft', '--t-accent-deep'];
 const COLORS = TOKENS.map((token) => `color-mix(in srgb, var(${token}) 12%, transparent)`);
 
 export default function FloatingBackground() {
-  const elements = useMemo(() => {
+  const [elements] = useState(() => {
     return Array.from({ length: 9 }, (_, i) => ({
       id: i,
       color: COLORS[i % COLORS.length],
@@ -16,7 +16,7 @@ export default function FloatingBackground() {
       delay: Math.random() * 5,
       rotateDuration: 10 + Math.random() * 5,
     }));
-  }, []);
+  });
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">

@@ -14,8 +14,10 @@ test('declares the Sites-compatible Vite toolchain', async () => {
     packageJson.devDependencies['@openai/sites-vite-plugin'],
     '^0.2.0',
   );
-  assert.equal(packageJson.devDependencies['@vitejs/plugin-react'], '^5.1.1');
-  assert.equal(packageJson.devDependencies.vite, '^8.2.2');
+  // Sites requires Vite 8; plugin-react 6 supports that major. Patch releases
+  // should not require rewriting this integration contract.
+  assert.match(packageJson.devDependencies['@vitejs/plugin-react'], /^\^6\./);
+  assert.match(packageJson.devDependencies.vite, /^\^8\./);
   assert.match(
     viteConfig,
     /import\s+\{\s*sites\s*\}\s+from\s+['"]@openai\/sites-vite-plugin['"]/,
@@ -24,6 +26,19 @@ test('declares the Sites-compatible Vite toolchain', async () => {
   assert.match(viteConfig, /viteEnvironment:\s*\{\s*name:\s*["']server["']/);
   assert.match(viteConfig, /config:\s*workerConfig/);
   assert.match(viteConfig, /not_found_handling:\s*["']single-page-application["']/);
+});
+
+test('loads the existing theme through the Tailwind 4 Vite integration', async () => {
+  const viteConfig = await readFile(new URL('vite.config.ts', root), 'utf8');
+  const css = await readFile(new URL('src/index.css', root), 'utf8');
+  const theme = await import(new URL('tailwind.config.js', root).href);
+
+  assert.match(viteConfig, /import tailwindcss from ['"]@tailwindcss\/vite['"]/);
+  assert.match(viteConfig, /tailwindcss\(\)/);
+  assert.match(css, /@import "tailwindcss"/);
+  assert.match(css, /@config "\.\.\/tailwind.config.js"/);
+  assert.equal(theme.default.theme.extend.colors.ground, 'var(--t-bg)');
+  assert.equal(theme.default.theme.extend.colors.accent.DEFAULT, 'var(--t-accent)');
 });
 
 test('publishes complete PixelPlay page metadata', async () => {

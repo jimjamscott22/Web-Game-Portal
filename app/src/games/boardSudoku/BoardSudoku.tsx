@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   generatePuzzle,
   isComplete,
@@ -23,7 +23,7 @@ export default function BoardSudoku({ onTimerTick, timerSeconds }: BoardSudokuPr
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
   const [notesMode, setNotesMode] = useState(false);
   const [solved, setSolved] = useState(false);
-  const [conflicts, setConflicts] = useState<Set<string>>(new Set());
+  const conflicts = useMemo(() => getConflicts(board), [board]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -31,10 +31,6 @@ export default function BoardSudoku({ onTimerTick, timerSeconds }: BoardSudokuPr
     }, 1000);
     return () => clearInterval(interval);
   }, [solved, onTimerTick]);
-
-  useEffect(() => {
-    setConflicts(getConflicts(board));
-  }, [board]);
 
   const newPuzzle = useCallback((diff: DifficultyName) => {
     setDifficulty(diff);

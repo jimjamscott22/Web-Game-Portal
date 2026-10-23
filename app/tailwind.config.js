@@ -1,10 +1,10 @@
-/** @type {import('tailwindcss').Config} */
+import animate from 'tailwindcss-animate';
 
 // Every colour resolves to a `--t-*` skin token defined in src/index.css, so
 // swapping `data-skin` on <html> re-themes utilities without a rebuild.
 const t = (name) => `var(--t-${name})`;
 
-module.exports = {
+export default {
   darkMode: ["class"],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
@@ -154,5 +154,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate],
 }

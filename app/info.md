@@ -1,8 +1,30 @@
-Using Node.js 20, Tailwind CSS v3.4.19, and Vite v7.2.4
+Use Node.js 22.13+ (required by the Sites plugin). The application uses
+React 19, Tailwind CSS 4, Vite 8, and the Cloudflare Vite plugin.
 
-Tailwind CSS has been set up with the shadcn theme
+Run commands from `app/`:
 
-Setup complete: /mnt/agents/output/app
+```sh
+npm ci
+npm run dev       # http://localhost:3000
+npm run build    # TypeScript checks, then client and Worker builds
+npm run lint
+npm run test     # Node test runner with tsx
+npm audit
+```
+
+Tailwind runs through `@tailwindcss/vite`. `src/index.css` imports Tailwind
+and explicitly loads `tailwind.config.js`, preserving the portal's skin
+tokens, fonts, shadows, and animations. There is no PostCSS configuration.
+
+Install scripts are controlled by the version-pinned `allowScripts` entries
+in `package.json`. Review blocked scripts with `npm install-scripts ls` after
+dependency updates. A user-level `.npmrc` `allow-scripts` setting is ignored
+when this project policy exists; npm warns about that precedence.
+
+Generated shadcn UI files retain their upstream implementation. ESLint allows
+their named variant/context exports. Two file-scoped compatibility exceptions
+cover the carousel's Embla synchronization effect and the sidebar skeleton's
+decorative random width. Application components retain the full hook rules.
 
 Components (40+):
   accordion, alert-dialog, alert, aspect-ratio, avatar, badge, breadcrumb,
@@ -28,4 +50,3 @@ Structure:
   index.html           Entry point for the Webapp
   tailwind.config.js   Configures Tailwind's theme, plugins, etc.
   vite.config.ts       Main build and dev server settings for Vite
-  postcss.config.js    Config file for CSS post-processing tools

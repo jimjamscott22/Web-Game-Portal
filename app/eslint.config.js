@@ -20,4 +20,31 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    files: ['src/components/ui/*.{ts,tsx}'],
+    rules: {
+      // shadcn's generated modules intentionally share variants and context hooks.
+      'react-refresh/only-export-components': ['error', {
+        allowConstantExport: true,
+        allowExportNames: [
+          'badgeVariants', 'buttonVariants', 'buttonGroupVariants',
+          'toggleVariants', 'navigationMenuTriggerStyle', 'useFormField', 'useSidebar',
+        ],
+      }],
+    },
+  },
+  {
+    files: ['src/components/ui/carousel.tsx'],
+    rules: {
+      // Upstream Embla integration synchronizes scroll controls on API attachment.
+      'react-hooks/set-state-in-effect': 'off',
+    },
+  },
+  {
+    files: ['src/components/ui/sidebar.tsx'],
+    rules: {
+      // Upstream skeleton samples a decorative width once per mounted instance.
+      'react-hooks/purity': 'off',
+    },
+  },
 ])

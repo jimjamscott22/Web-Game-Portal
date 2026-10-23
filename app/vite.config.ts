@@ -1,6 +1,7 @@
 import path from "path"
 import { sites } from "@openai/sites-vite-plugin"
 import react from "@vitejs/plugin-react"
+import tailwindcss from "@tailwindcss/vite"
 import { defineConfig } from "vite"
 
 const workerConfig = {
@@ -18,6 +19,7 @@ export default defineConfig(async () => {
   return {
     base: './',
     plugins: [
+      tailwindcss(),
       react(),
       sites(),
       cloudflare({ viteEnvironment: { name: "server" }, config: workerConfig }),

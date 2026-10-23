@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 
 export type UseKeyboardOptions = {
   /** Keys that should fire once per physical press (ignore `keydown` auto-repeat). */
@@ -12,31 +12,27 @@ function keyIgnoresRepeat(e: KeyboardEvent, noRepeat: string[]): boolean {
 
 export function useKeyboard(
   keyMap: Record<string, () => void>,
-  deps: React.DependencyList = [],
+  // Retained for existing callers; Effect Events always read the latest key map.
+  _deps: React.DependencyList = [],
   options?: UseKeyboardOptions
 ) {
-  const keyMapRef = useRef(keyMap);
-  keyMapRef.current = keyMap;
-  const noRepeat = options?.noRepeat;
-  const noRepeatRef = useRef(noRepeat ?? []);
-  useEffect(() => { noRepeatRef.current = noRepeat ?? []; }, [noRepeat]);
+  void _deps;
+  const handler = useEffectEvent((e: KeyboardEvent) => {
+    const key = e.key.toLowerCase();
+    const action = keyMap[key] || keyMap[e.key];
+    if (!action) return;
+
+    if (e.repeat && keyIgnoresRepeat(e, options?.noRepeat ?? [])) {
+      e.preventDefault();
+      return;
+    }
+
+    e.preventDefault();
+    action();
+  });
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase();
-      const action = keyMapRef.current[key] || keyMapRef.current[e.key];
-      if (!action) return;
-
-      if (e.repeat && keyIgnoresRepeat(e, noRepeatRef.current)) {
-        e.preventDefault();
-        return;
-      }
-
-      e.preventDefault();
-      action();
-    };
-
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, deps);
+  }, []);
 }
