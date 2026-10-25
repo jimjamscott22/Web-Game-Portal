@@ -8,6 +8,8 @@ interface WinOverlayProps {
   best?: number | string;
   onKeepGoing?: () => void;
   onNewGame: () => void;
+  keepGoingLabel?: string;
+  newGameLabel?: string;
 }
 
 export default function WinOverlay({
@@ -17,6 +19,8 @@ export default function WinOverlay({
   best,
   onKeepGoing,
   onNewGame,
+  keepGoingLabel = 'Keep going',
+  newGameLabel = 'New game',
 }: WinOverlayProps) {
   return (
     <>
@@ -27,14 +31,14 @@ export default function WinOverlay({
             className="btn btn-primary justify-center px-6 py-3 text-base"
             onClick={onKeepGoing}
           >
-            Keep going
+            {keepGoingLabel}
           </button>
         )}
         <button
           className={`btn justify-center px-6 py-3 text-base ${onKeepGoing ? 'btn-secondary' : 'btn-primary'}`}
           onClick={onNewGame}
         >
-          New game
+          {newGameLabel}
         </button>
       </OverlayDialog>
     </>
