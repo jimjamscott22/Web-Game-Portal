@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Droplet, Lightbulb, RotateCcw, Trash2, Undo2 } from 'lucide-react';
 import {
   applyMove,
@@ -30,6 +30,7 @@ export default function BoardPourPuzzle({ level, onMove, onWin }: BoardPourPuzzl
   const [hint, setHint] = useState<Move | null>(null);
   const [usedHint, setUsedHint] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const jugRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const state = history[history.length - 1];
   const moves = history.length - 1;
@@ -104,14 +105,18 @@ export default function BoardPourPuzzle({ level, onMove, onWin }: BoardPourPuzzl
     setMessage(`Hint: ${describeMove(level, path[0])}.`);
   }, [solved, level, state]);
 
+  // Focus follows the cursor so Enter/Space on the focused jug match the highlight.
   const moveCursor = useCallback((delta: number) => {
-    setCursor(c => (c + delta + jugCount) % jugCount);
-  }, [jugCount]);
+    const next = (cursor + delta + jugCount) % jugCount;
+    setCursor(next);
+    jugRefs.current[next]?.focus();
+  }, [cursor, jugCount]);
 
   const jugKeys = Object.fromEntries(
     level.capacities.map((_, i) => [String(i + 1), () => tapJug(i)]),
   );
-  useKeyboard({
+  // Once solved, the win overlay's buttons own the keyboard.
+  useKeyboard(solved ? {} : {
     ...jugKeys,
     arrowleft: () => moveCursor(-1),
     arrowright: () => moveCursor(1),
@@ -125,7 +130,7 @@ export default function BoardPourPuzzle({ level, onMove, onWin }: BoardPourPuzzl
     backspace: undo,
     r: restart,
     h: showHint,
-  }, [tapJug, moveCursor, play, undo, restart, showHint]);
+  }, [tapJug, moveCursor, play, undo, restart, showHint], { passThroughOnControls: ['enter', ' '] });
 
   const swipeHandlers = useSwipe({
     onSwipeLeft: () => moveCursor(-1),
@@ -170,6 +175,7 @@ export default function BoardPourPuzzle({ level, onMove, onWin }: BoardPourPuzzl
                   {state[i]}<span className="text-sm text-muted-foreground">/{cap}</span>
                 </div>
                 <button
+                  ref={el => { jugRefs.current[i] = el; }}
                   onClick={() => tapJug(i)}
                   disabled={solved}
                   aria-label={`Jug ${i + 1}: ${state[i]} of ${cap}${isSelected ? ', selected' : ''}`}

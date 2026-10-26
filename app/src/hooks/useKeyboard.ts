@@ -3,7 +3,18 @@ import { useEffect, useEffectEvent } from 'react';
 export type UseKeyboardOptions = {
   /** Keys that should fire once per physical press (ignore `keydown` auto-repeat). */
   noRepeat?: string[];
+  /**
+   * Keys left to the browser when focus is on a button, link or form field,
+   * so Enter/Space still activate the focused control.
+   */
+  passThroughOnControls?: string[];
 };
+
+const CONTROL_SELECTOR = 'button, a[href], input, select, textarea, [role="button"]';
+
+function targetIsControl(e: KeyboardEvent): boolean {
+  return e.target instanceof Element && e.target.closest(CONTROL_SELECTOR) !== null;
+}
 
 function keyIgnoresRepeat(e: KeyboardEvent, noRepeat: string[]): boolean {
   const lower = e.key.toLowerCase();
@@ -21,6 +32,9 @@ export function useKeyboard(
     const key = e.key.toLowerCase();
     const action = keyMap[key] || keyMap[e.key];
     if (!action) return;
+
+    const passThrough = options?.passThroughOnControls ?? [];
+    if (passThrough.some(k => k.toLowerCase() === key) && targetIsControl(e)) return;
 
     if (e.repeat && keyIgnoresRepeat(e, options?.noRepeat ?? [])) {
       e.preventDefault();
