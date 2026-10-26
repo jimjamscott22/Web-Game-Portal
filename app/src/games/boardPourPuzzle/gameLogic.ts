@@ -59,17 +59,17 @@ export const LEVELS: Record<Tier, PourLevel[]> = {
     {
       id: 'closed-1', name: 'Share the milk', capacities: [8, 5, 3], start: [8, 0, 0], tap: false,
       goal: { amount: 4, count: 2 },
-      insight: 'With no tap the total is conserved (always 8), so the puzzle is really about moving water in a fixed loop: 8 → 5 → 3 → 8.',
+      insight: "With no tap the total is always 8. Drain the 5 through the 3 back into the 8, and only refill the 5 from the 8 once it's empty.",
     },
     {
       id: 'closed-2', name: 'Even split', capacities: [10, 7, 3], start: [10, 0, 0], tap: false,
       goal: { amount: 5, count: 2 },
-      insight: 'A cycle of pours — big → middle → small → big — is guaranteed to visit every reachable state. Spotting the cycle beats guessing.',
+      insight: "Same rule: keep draining the 7 through the 3 back into the 10, and refill the 7 only when it's empty. Following it walks you straight to two 5s.",
     },
     {
       id: 'closed-3', name: 'Dozen', capacities: [12, 7, 5], start: [12, 0, 0], tap: false,
       goal: { amount: 6, count: 2 },
-      insight: 'Same loop, longer: big → 7 → 5 → big. The total stays 12, so two 6s means the third jug ends up empty.',
+      insight: "Same rule, longer: drain the 7 through the 5 back into the 12, refilling the 7 only when it's empty. The total stays 12, so two 6s leave the third jug empty.",
     },
     {
       id: 'closed-4', name: 'Pick one', capacities: [8, 5, 3], start: [8, 0, 0], tap: false,

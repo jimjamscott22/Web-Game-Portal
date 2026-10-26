@@ -35,6 +35,26 @@ test('closed levels conserve water', () => {
   assert.ok(isSolved(closed, state));
 });
 
+test('the refill-only-when-empty rule from the insights solves the share levels', () => {
+  // Jugs are [big, middle, small]. Pour small → big when small is full,
+  // big → middle when middle is empty, otherwise middle → small.
+  for (const id of ['closed-1', 'closed-2', 'closed-3']) {
+    const level = LEVELS.closed.find(l => l.id === id)!;
+    const small = level.capacities[2];
+    let state = level.start;
+    for (let step = 0; step < 50 && !isSolved(level, state); step++) {
+      const move = state[2] === small
+        ? { type: 'pour' as const, from: 2, to: 0 }
+        : state[1] === 0
+          ? { type: 'pour' as const, from: 0, to: 1 }
+          : { type: 'pour' as const, from: 1, to: 2 };
+      state = applyMove(level, state, move)!;
+      assert.ok(state, `${id}: rule produced a no-op`);
+    }
+    assert.ok(isSolved(level, state), `${id}: rule should reach the goal`);
+  }
+});
+
 test('goal count requires that many matching jugs', () => {
   assert.equal(isSolved(closed, [4, 1, 3]), false);
   assert.equal(isSolved(closed, [4, 4, 0]), true);
