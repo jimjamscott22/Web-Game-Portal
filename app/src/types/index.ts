@@ -137,6 +137,17 @@ export const GAMES: GameConfig[] = [
     difficulties: ['Easy', 'Medium', 'Hard'],
     defaultDifficulty: 'Easy',
   },
+  {
+    id: 'pour-puzzle',
+    title: 'Pour Puzzle',
+    description: 'Measure exact amounts with unmarked jugs — fill, empty, and pour your way to the goal. Hit par for three stars and learn the math behind each solution.',
+    color: 'var(--t-s15)',
+    bgColor: 'var(--t-s15)',
+    route: '/pour-puzzle',
+    previewImage: '/assets/card-preview-pour-puzzle.svg',
+    difficulties: ['Two jugs', 'No tap', 'Three jugs'],
+    defaultDifficulty: 'Two jugs',
+  },
 ];
 
 export const NAV_GAMES: NavGame[] = GAMES.map(g => ({

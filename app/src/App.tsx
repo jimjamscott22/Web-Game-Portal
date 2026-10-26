@@ -20,6 +20,7 @@ const GameRoboRoute = lazy(() => import('@/pages/GameRoboRoute'));
 const GameNonogram = lazy(() => import('@/pages/GameNonogram'));
 const GameBreakout = lazy(() => import('@/pages/GameBreakout'));
 const GameCodeBreaker = lazy(() => import('@/pages/GameCodeBreaker'));
+const GamePourPuzzle = lazy(() => import('@/pages/GamePourPuzzle'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="/nonogram" element={<GameNonogram />} />
             <Route path="/breakout" element={<GameBreakout />} />
             <Route path="/code-breaker" element={<GameCodeBreaker />} />
+            <Route path="/pour-puzzle" element={<GamePourPuzzle />} />
           </Routes>
         </Suspense>
       </div>
